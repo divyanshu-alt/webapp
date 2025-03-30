@@ -98,6 +98,8 @@ io.on('connection', (socket) => {
       lobbies.get(code).addPlayer(socket, username);
       socket.emit('lobby-created', code);
     } catch (err) {
+      console.log('Failed to create lobby');
+      console.log(err);
       socket.emit('error', 'Failed to create lobby');
     }
   });
