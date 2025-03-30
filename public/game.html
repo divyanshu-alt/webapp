@@ -242,6 +242,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            font-weight: 500;
         }
 
         .lobby-actions {
@@ -348,10 +349,16 @@
         }
 
         .message.user {
-            background-color: var(--message-bg);
-            color: var(--message-color);
+            background-color: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
             align-self: flex-end;
             margin-left: auto;
+        }
+        
+        .message.user .sender {
+          color var(--message-color);
+          font-weight: 600;
         }
 
         .message .sender {
@@ -455,6 +462,18 @@
             #send-btn {
                 width: 100%;
             }
+        }
+        
+        @media (min-width: 768px) and (orientation: landscape) {
+          #messageInput {
+            flex: 3;
+            min-width: 300px;
+          }
+          
+          #sendBtn {
+            flex: 1;
+            max-width: 120px;
+          }
         }
 
         @media (max-width: 480px) {
@@ -648,33 +667,35 @@
         }
 
         // Lobby functions
-        function updateTimer(createdAt) {
-            clearInterval(lobbyTimer);
-            const lobbyDuration = 60 * 60 * 1000; // 1 hour
-            const endTime = createdAt + lobbyDuration;
-            
-            function update() {
-                const remaining = endTime - Date.now();
-                if (remaining <= 0) {
-                    document.getElementById('timeRemaining').textContent = 'Lobby expired';
-                    clearInterval(lobbyTimer);
-                    return;
-                }
-                
-                const hours = Math.floor(remaining / 3600000);
-                const minutes = Math.floor((remaining % 3600000) / 60000);
-                const seconds = Math.floor((remaining % 60000) / 1000);
-                
-                let timeString = '';
-                if (hours > 0) timeString += `${hours}h `;
-                timeString += `${minutes}m ${seconds}s`;
-                
-                document.getElementById('timeRemaining').textContent = timeString;
-            }
-            
-            update();
-            lobbyTimer = setInterval(update, 1000);
-        }
+         function updateTimer(createdAt) {
+           clearInterval(lobbyTimer);
+           const lobbyDuration = 60 * 60 * 1000; // 1 hour
+           const endTime = createdAt + lobbyDuration;
+           
+           function formatTime(ms) {
+             const hours = Math.floor(ms / 3600000);
+             const minutes = Math.floor((ms % 3600000) / 60000);
+             const seconds = Math.floor((ms % 60000) / 1000);
+             
+             if (hours > 0) return `${hours}h ${minutes}m`;
+             if (minutes > 5) return `${minutes}m`;
+             if (minutes > 0) return `${minutes}m ${seconds}s`;
+             return `${seconds}s`;
+           }
+           
+           function update() {
+             const remaining = endTime - Date.now();
+             if (remaining <= 0) {
+               document.getElementById('timeRemaining').textContent = 'Lobby expired';
+               clearInterval(lobbyTimer);
+               return;
+             }
+             document.getElementById('timeRemaining').textContent = `Expires in ${formatTime(remaining)}`;
+           }
+           
+           update();
+           lobbyTimer = setInterval(update, 1000);
+         }
 
         function renderPlayers(players) {
             const container = document.getElementById('playersContainer');
@@ -688,25 +709,23 @@
         }
 
         function addMessage(content, isSystem = false, type = '') {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            
-            if (isSystem) {
-                messageDiv.className = `message system ${type}`;
-                messageDiv.textContent = content;
-            } else {
-                messageDiv.className = 'message user';
-                messageDiv.style.setProperty('--message-bg', `${content.color}20`);
-                messageDiv.style.setProperty('--message-color', content.color);
-                messageDiv.innerHTML = `
-                    <div class="sender">${content.username}</div>
-                    <div>${content.text}</div>
-                `;
-            }
-            
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+           const messagesDiv = document.getElementById('messages');
+           const messageDiv = document.createElement('div');
+           
+           if (isSystem) {
+             messageDiv.className = `message system ${type}`;
+             messageDiv.textContent = content;
+           } else {
+             messageDiv.className = 'message user';
+             messageDiv.innerHTML = `
+                            <div class="sender" style="color: ${content.color}">${content.username}</div>
+                            <div class="message-text">${content.text}</div>
+                        `;
+           }
+           
+           messagesDiv.appendChild(messageDiv);
+           messagesDiv.scrollTop = messagesDiv.scrollHeight;
+         }
 
         function showError(message) {
             addMessage(`Error: ${message}`, true, 'error');
