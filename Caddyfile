@@ -1,0 +1,14 @@
+divyanshuverma.in, www.divyanshuverma.in {
+  root * /srv
+  file_server
+
+  @backend {
+    path /api/*
+    path /game/*
+  }
+
+  reverse_proxy @backend app:3000
+
+  encode gzip
+  tls dev.verma1010@gmail.com
+}

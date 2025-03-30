@@ -1,0 +1,20 @@
+#!/bin/bash
+# Update and install Docker
+sudo apt-get update -y
+sudo apt-get install -y docker.io docker-compose git
+
+# Clone repo
+git clone https://github.com/divyanshu-alt/webapp.git /home/ubuntu/app
+cd /home/ubuntu/app
+
+# Start containers
+sudo docker-compose up -d --build
+
+# Enable auto-start
+sudo systemctl enable docker
+echo "@reboot cd /home/ubuntu/app && sudo docker-compose up -d" | crontab -
+
+# Open ports
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw enable

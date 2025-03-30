@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Divyanshu Verma - Personal Website (Dark Theme)</title>
+  <!-- Roboto font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      /* Pulsating background animation from very dark grey to black */
+      animation: pulseBg 10s infinite alternate;
+      font-family: 'Roboto', sans-serif;
+      color: #fff;
+      overflow: hidden;
+    }
+    @keyframes pulseBg {
+      0%   { background-color: #000; }
+      50%  { background-color: #111; }
+      100% { background-color: #000; }
+    }
+    /* Twinkling star style */
+    .star {
+      position: absolute;
+      background: #fff;
+      border-radius: 50%;
+      width: 2px;
+      height: 2px;
+      opacity: 0;
+      animation: blink 3s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0; }
+      50%      { opacity: 1; }
+    }
+    /* Centered title and subtitle */
+    .center-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 1.5s ease 0.5s forwards;
+    }
+    .center-content h1 {
+      font-size: 3em;
+      margin: 0;
+    }
+    .center-content .subtitle {
+      font-size: 1.5em;
+      margin: 0;
+      opacity: 0.8;
+    }
+    /* Bottom icon links and footer text */
+    .bottom-content {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 1.5s ease 1.5s forwards;
+    }
+    .socials a {
+      margin: 0 10px;
+      color: inherit;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.3s;
+    }
+    .socials a:hover {
+      transform: scale(1.2);
+    }
+    .socials svg {
+      width: 32px;
+      height: 32px;
+      fill: currentColor;
+      vertical-align: middle;
+    }
+    .made-with {
+      margin-top: 10px;
+      font-size: 0.9em;
+      opacity: 0.7;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="center-content">
+    <h1>Divyanshu Verma</h1>
+  </div>
+
+  <div class="bottom-content">
+    <div class="socials">
+      <!-- GitHub icon/link -->
+      <a href="https://github.com/divyanshuverma" target="_blank" aria-label="GitHub">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8 
+                   c0 3.54 2.29 6.53 5.47 7.59 
+                   0.4 0.07 0.55 -0.17 0.55 -0.38 
+                   0 -0.19 -0.01 -0.82 -0.01 -1.49 
+                   -2.01 0.37 -2.53 -0.49 -2.69 -0.94 
+                   -0.09 -0.23 -0.48 -0.94 -0.82 -1.13 
+                   -0.28 -0.15 -0.68 -0.52 -0.01 -0.53 
+                   0.63 -0.01 1.08 0.58 1.23 0.82 
+                   0.72 1.21 1.87 0.87 2.33 0.66 
+                   0.07 -0.52 0.28 -0.87 0.51 -1.07 
+                   -1.78 -0.2 -3.64 -0.89 -3.64 -3.95 
+                   0 -0.87 0.31 -1.59 0.82 -2.15 
+                   -0.08 -0.2 -0.36 -1.02 0.08 -2.12 
+                   0 0 0.67 -0.21 2.2 0.82 
+                   0.64 -0.18 1.32 -0.27 2 -0.27 
+                   0.68 0 1.36 0.09 2 0.27 
+                   1.53 -1.04 2.2 -0.82 2.2 -0.82 
+                   0.44 1.1 0.16 1.92 0.08 2.12 
+                   0.51 0.56 0.82 1.27 0.82 2.15 
+                   0 3.07 -1.87 3.75 -3.65 3.95 
+                   0.29 0.25 0.54 0.73 0.54 1.48 
+                   0 1.07 -0.01 1.93 -0.01 2.2 
+                   0 0.21 0.15 0.46 0.55 0.38 
+                   C13.71 14.53 16 11.53 16 8 
+                   16 3.58 12.42 0 8 0z"/>
+        </svg>
+      </a>
+      <!-- Personal website icon/link (globe) -->
+      <a href="https://www.divyanshuverma.in" target="_blank" aria-label="Website">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8 
+                   m7.5-6.923 c-.67.204-1.335.82-1.887 1.855 
+                   A8 8 0 0 0 5.145 4 H7.5 z 
+                   M4.09 4 a9.3 9.3 0 0 1 .64-1.539 
+                   7 7 0 0 1 .597-.933 
+                   A7.03 7.03 0 0 0 2.255 4 
+                   z m-.582 3.5 c.03-.877.138-1.718.312-2.5 
+                   H1.674 a7 7 0 0 0-.656 2.5 
+                   z M4.847 5 a12.5 12.5 0 0 0-.338 2.5 
+                   H7.5 V5 z 
+                   M8.5 5 v2.5 h2.99 
+                   a12.5 12.5 0 0 0-.337-2.5 
+                   z M4.51 8.5 a12.5 12.5 0 0 0 .337 2.5 
+                   H7.5 V8.5 z 
+                   m3.99 0 V11 h2.653 
+                   c.187-.765.306-1.608.338-2.5 
+                   z M5.145 12 q.208.58.468 1.068 
+                   c.552 1.035 1.218 1.65 1.887 1.855 
+                   V12 z 
+                   m.182 2.472 a7 7 0 0 1-.597-.933 
+                   A9.3 9.3 0 0 1 4.09 12 
+                   H2.255 a7 7 0 0 0 3.072 2.472 
+                   M3.82 11 a13.7 13.7 0 0 1-.312-2.5 
+                   h-2.49 c.062.89.291 1.733.656 2.5 
+                   z m6.853 3.472 A7 7 0 0 0 13.745 12 
+                   H11.91 a9.3 9.3 0 0 1-.64 1.539 
+                   7 7 0 0 1-.597.933 
+                   M8.5 12 v2.923 
+                   c.67-.204 1.335-.82 1.887-1.855 
+                   q.26-.487.468-1.068 
+                   z m3.68-1 h2.146 
+                   c.365-.767.594-1.61.656-2.5 
+                   h-2.49 a13.7 13.7 0 0 1-.312 2.5 
+                   m2.802-3.5 a7 7 0 0 0-.656-2.5 
+                   H12.18 c.174.782.282 1.623.312 2.5 
+                   z M11.27 2.461 c.247.464.462.98.64 1.539 
+                   h1.835 a7 7 0 0 0-3.072-2.472 
+                   c.218.284.418.598.597.933 
+                   M10.855 4 a8 8 0 0 0-.468-1.068 
+                   C9.835 1.897 9.17 1.282 8.5 1.077 
+                   V4z"/>
+        </svg>
+      </a>
+      <!-- Email contact icon/link (envelope) -->
+      <a href="mailto:dev.verma1010@gmail.com" aria-label="Email">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1 -2 -2 
+                   z m2-1 a1 1 0 0 0 -1 1v.217 
+                   l7 4.2 7-4.2 V4 
+                   a1 1 0 0 0 -1 -1 
+                   z m13 2.383 -4.708 2.825 
+                   L15 11.105 
+                   z m-.034 6.876 -5.64-3.471 
+                   L8 9.583 l-1.326-.795 -5.64 3.47 
+                   A1 1 0 0 0 2 13h12 
+                   a1 1 0 0 0 .966-.741 
+                   M1 11.105 l4.708-2.897 
+                   L1 5.383z"/>
+        </svg>
+      </a>
+    </div>
+    <div class="made-with">Made in Bengaluru.</div>
+  </div>
+
+  <script>
+    // Generate twinkling stars in the background
+    document.addEventListener('DOMContentLoaded', function() {
+      const starCount = 60;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        // Random position within the viewport
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top  = Math.random() * 100 + '%';
+        // Random blink duration (2-5s) and delay (0-5s)
+        const duration = 2 + Math.random() * 3;
+        const delay = Math.random() * 5;
+        star.style.animationDuration = duration + 's';
+        star.style.animationDelay = delay + 's';
+        // Random star size between 1px and 3px
+        const size = (Math.random() * 2 + 1) + 'px';
+        star.style.width = size;
+        star.style.height = size;
+        document.body.appendChild(star);
+      }
+    });
+  </script>
+</body>
+</html>
