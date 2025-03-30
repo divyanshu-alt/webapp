@@ -1,39 +1,417 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Lobby</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .container { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        #players { background: #f0f0f0; padding: 15px; }
-        #chat { display: flex; flex-direction: column; height: 400px; }
-        #messages { flex: 1; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-        .message { margin-bottom: 8px; }
-        .system-message { color: #666; font-style: italic; }
-        input, button { padding: 8px; margin-bottom: 10px; }
-        button { cursor: pointer; background: #007bff; color: white; border: none; }
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --primary: #6c5ce7;
+            --primary-light: #857beb;
+            --text: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --error: #d63031;
+            --card-bg: #1e1e1e;
+            --border: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-darker);
+            color: var(--text);
+            font-size: 1rem;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .lobby-interface {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .lobby-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .lobby-code {
+            background-color: var(--bg-darker);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: var(--primary-light);
+        }
+
+        .player-count {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 300px;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background-color: var(--bg-darker);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--bg-dark);
+        }
+
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 6px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .message .sender {
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .system-message {
+            color: var(--warning);
+            font-style: italic;
+        }
+
+        .player-joined {
+            color: var(--success);
+        }
+
+        .player-left {
+            color: var(--error);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex: 1;
+        }
+
+        #send-btn {
+            width: auto;
+            padding: 12px;
+        }
+
+        .players-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .player-card {
+            background-color: var(--bg-darker);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .player-card.host::after {
+            content: "👑";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            font-size: 1.2rem;
+        }
+
+        .share-section {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #qrcode {
+            margin: 20px auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .share-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: var(--bg-darker);
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary-light);
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .players-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+            
+            .lobby-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chat-input {
+                flex-direction: column;
+            }
+            
+            #send-btn {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="lobby-creation">
-        <h1>Create or Join Lobby</h1>
-        <input type="text" id="username" placeholder="Enter your name" required>
-        <input type="text" id="lobby-code" placeholder="Enter lobby code (leave blank to create new)">
-        <button onclick="handleJoin()">Join</button>
-        <div id="error" style="color: red;"></div>
-    </div>
-
-    <div id="lobby-interface" style="display: none;">
-        <h2>Lobby Code: <span id="lobby-code-display"></span></h2>
-        <div class="container">
-            <div id="players">
-                <h3>Players (<span id="player-count">0</span>)</h3>
-                <ul id="player-list"></ul>
+    <div class="container">
+        <h1>Game Lobby</h1>
+        
+        <div id="lobby-creation">
+            <div class="tabs">
+                <div class="tab active" data-tab="create">Create Lobby</div>
+                <div class="tab" data-tab="join">Join Lobby</div>
             </div>
-            <div id="chat">
+            
+            <div class="tab-content active" data-tab="create">
+                <div class="card">
+                    <div class="form-group">
+                        <label for="username-create">Your Name</label>
+                        <input type="text" id="username-create" placeholder="Enter your name" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <button class="btn" id="create-btn">Create Lobby</button>
+                </div>
+            </div>
+            
+            <div class="tab-content" data-tab="join">
+                <div class="card">
+                    <div class="form-group">
+                        <label for="username-join">Your Name</label>
+                        <input type="text" id="username-join" placeholder="Enter your name" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <div class="form-group">
+                        <label for="lobby-code-input">Lobby Code</label>
+                        <input type="text" id="lobby-code-input" placeholder="Enter lobby code" autocapitalize="none" autocorrect="off" spellcheck="false">
+                    </div>
+                    <button class="btn" id="join-btn">Join Lobby</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="lobby-interface" class="lobby-interface">
+            <div class="lobby-header">
+                <div>
+                    <h2>Lobby: <span class="lobby-code" id="lobby-code-display"></span></h2>
+                    <div class="player-count"><span id="player-count">1</span> player(s) in lobby</div>
+                </div>
+                <button class="btn btn-secondary" id="share-btn">Share Lobby</button>
+            </div>
+            
+            <div class="card">
+                <h3>Players</h3>
+                <div class="players-list" id="player-list"></div>
+            </div>
+            
+            <div class="card chat-container">
+                <h3>Chat</h3>
                 <div id="messages"></div>
-                <input type="text" id="message-input" placeholder="Type your message...">
-                <button onclick="sendMessage()">Send Message</button>
+                <div class="chat-input">
+                    <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
+                    <button class="btn" id="send-btn">Send</button>
+                </div>
+            </div>
+            
+            <div class="share-section" id="share-section">
+                <h3>Invite Players</h3>
+                <p>Share this lobby with others:</p>
+                <div id="qrcode"></div>
+                <div class="share-buttons">
+                    <button class="share-btn" id="copy-link-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 17.929H6c-1.105 0-2-.912-2-2.036V5.036C4 3.91 4.895 3 6 3h8c1.105 0 2 .911 2 2.036v1.866m-6 .17h8c1.105 0 2 .91 2 2.035v10.857C20 21.09 19.105 22 18 22h-8c-1.105 0-2-.911-2-2.036V9.107c0-1.124.895-2.036 2-2.036z"></path>
+                        </svg>
+                        Copy Link
+                    </button>
+                    <button class="share-btn" id="share-native-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        Share
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -42,22 +420,44 @@
     <script>
         const socket = io();
         let currentLobbyCode = '';
+        let isHost = false;
+        let lobbyUrl = '';
 
-        function handleJoin() {
-            const username = document.getElementById('username').value.trim();
-            const code = document.getElementById('lobby-code').value.trim().toLowerCase();
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.querySelector(`.tab-content[data-tab="${tab.dataset.tab}"]`).classList.add('active');
+            });
+        });
+
+        // Lobby creation
+        document.getElementById('create-btn').addEventListener('click', () => {
+            const username = document.getElementById('username-create').value.trim();
+            if (!username) return showError('Please enter a username');
             
-            if (!username) {
-                showError('Please enter a username');
-                return;
-            }
+            socket.emit('create-lobby', username);
+        });
 
-            if (code) {
-                socket.emit('join-lobby', { code, username });
-            } else {
-                socket.emit('create-lobby', username);
-            }
-        }
+        // Lobby joining
+        document.getElementById('join-btn').addEventListener('click', () => {
+            const username = document.getElementById('username-join').value.trim();
+            const code = document.getElementById('lobby-code-input').value.trim().toLowerCase();
+            
+            if (!username) return showError('Please enter a username');
+            if (!code) return showError('Please enter a lobby code');
+            
+            socket.emit('join-lobby', { code, username });
+        });
+
+        // Chat message sending
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('message-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
 
         function sendMessage() {
             const input = document.getElementById('message-input');
@@ -65,66 +465,133 @@
             if (message) {
                 socket.emit('chat-message', message);
                 input.value = '';
+                input.focus();
             }
         }
+
+        // Share functionality
+        document.getElementById('share-btn').addEventListener('click', () => {
+            document.getElementById('share-section').style.display = 'block';
+        });
+
+        document.getElementById('copy-link-btn').addEventListener('click', () => {
+            navigator.clipboard.writeText(lobbyUrl).then(() => {
+                addMessage('System: Lobby link copied to clipboard!', true);
+            });
+        });
+
+        document.getElementById('share-native-btn').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join my game lobby',
+                    text: `Join my game lobby using code: ${currentLobbyCode}`,
+                    url: lobbyUrl
+                }).catch(err => {
+                    console.log('Error sharing:', err);
+                });
+            } else {
+                navigator.clipboard.writeText(lobbyUrl).then(() => {
+                    addMessage('System: Lobby link copied to clipboard!', true);
+                });
+            }
+        });
 
         // Socket event handlers
         socket.on('lobby-created', (code) => {
             currentLobbyCode = code;
+            isHost = true;
+            lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${code}`;
             showLobbyInterface(code);
+            generateQRCode();
+            document.getElementById('share-section').style.display = 'block';
         });
 
-        socket.on('lobby-joined', () => {
-            showLobbyInterface(document.getElementById('lobby-code').value.toUpperCase());
+        socket.on('lobby-joined', (hostUsername) => {
+            showLobbyInterface(currentLobbyCode);
+            addMessage(`System: Joined lobby hosted by ${hostUsername}`, true);
+            generateQRCode();
         });
 
         socket.on('player-list', (players) => {
             const list = document.getElementById('player-list');
-            list.innerHTML = players.map(p => `<li>${p}</li>`).join('');
+            list.innerHTML = players.map((player, index) => 
+                `<div class="player-card ${index === 0 ? 'host' : ''}">${player}</div>`
+            ).join('');
             document.getElementById('player-count').textContent = players.length;
+            
+            // Auto-show share section for host when first player joins
+            if (isHost && players.length > 1) {
+                document.getElementById('share-section').style.display = 'block';
+            }
         });
 
         socket.on('chat-message', ({ username, message }) => {
             addMessage(`${username}: ${message}`);
         });
 
+        socket.on('player-joined', (username) => {
+            addMessage(`System: ${username} joined the lobby`, true, 'player-joined');
+        });
+
         socket.on('player-left', ({ username, reason }) => {
-            addMessage(`System: ${username} left (${reason})`, true);
+            addMessage(`System: ${username} left (${reason})`, true, 'player-left');
         });
 
         socket.on('lobby-disbanded', () => {
-            alert('Lobby has expired');
-            window.location.reload();
+            addMessage('System: Lobby has been disbanded', true);
+            setTimeout(() => {
+                alert('The lobby host has ended the session');
+                window.location.reload();
+            }, 1000);
         });
 
         socket.on('error', (message) => {
             showError(message);
         });
-        
-        // Shows as "Happy-Penguin" but stores as "happy-penguin"
-        function displayLobbyCode(code) {
-          return code.split('-').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1)
-          ).join('-');
-        }
 
+        // UI functions
         function showLobbyInterface(code) {
             document.getElementById('lobby-creation').style.display = 'none';
-            document.getElementById('lobby-interface').style.display = 'block';
-            document.getElementById('lobby-code-display').textContent = displayLobbyCode(code);
+            document.getElementById('lobby-interface').style.display = 'flex';
+            document.getElementById('lobby-code-display').textContent = code;
+            
+            // Check URL for lobby code
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('lobby') && !currentLobbyCode) {
+                currentLobbyCode = urlParams.get('lobby');
+                document.getElementById('lobby-code-input').value = currentLobbyCode;
+                document.querySelector('.tab[data-tab="join"]').click();
+            }
         }
 
-        function addMessage(message, isSystem = false) {
+        function addMessage(message, isSystem = false, extraClass = '') {
             const div = document.createElement('div');
-            div.className = `message ${isSystem ? 'system-message' : ''}`;
-            div.textContent = message;
+            div.className = `message ${isSystem ? 'system-message' : ''} ${extraClass}`;
+            div.innerHTML = isSystem ? message : `<span class="sender">${message.split(':')[0]}:</span> ${message.split(':').slice(1).join(':')}`;
             document.getElementById('messages').appendChild(div);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
         }
 
         function showError(message) {
-            document.getElementById('error').textContent = message;
-            setTimeout(() => document.getElementById('error').textContent = '', 3000);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'message system-message';
+            errorDiv.textContent = `Error: ${message}`;
+            document.getElementById('messages').appendChild(errorDiv);
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+        function generateQRCode() {
+            lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobbyCode}`;
+            QRCode.toCanvas(document.getElementById('qrcode'), lobbyUrl, { width: 200 }, (error) => {
+                if (error) console.error('QR code generation failed:', error);
+            });
+        }
+
+        // Initialize
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('lobby')) {
+            document.getElementById('lobby-code-input').value = urlParams.get('lobby');
+            document.querySelector('.tab[data-tab="join"]').click();
         }
     </script>
 </body>

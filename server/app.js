@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
-
 const { generateSlug } = require('random-word-slugs');
 
 const app = express();
@@ -28,6 +27,7 @@ class Lobby {
   addPlayer(socket, username) {
     if (this.players.size >= 50) throw new Error('Lobby is full');
     
+    const isFirstPlayer = this.players.size === 0;
     this.players.set(socket.id, {
       username,
       lastActive: Date.now(),
@@ -41,6 +41,13 @@ class Lobby {
     socket.join(this.code);
     this.updateActivity(socket.id);
     this.broadcastPlayerList();
+    
+    // Notify about new player (except the joining player)
+    if (!isFirstPlayer) {
+      socket.to(this.code).emit('player-joined', username);
+    }
+    
+    return isFirstPlayer;
   }
   
   removePlayer(socketId, reason) {
@@ -84,21 +91,25 @@ io.on('connection', (socket) => {
   let currentLobby = null;
   
   socket.on('create-lobby', (username) => {
-    const code = generateLobbyCode();
-    lobbies.set(code, new Lobby(code));
-    currentLobby = code;
-    lobbies.get(code).addPlayer(socket, username);
-    socket.emit('lobby-created', code);
+    try {
+      const code = generateSlug(2, { format: 'kebab' });
+      lobbies.set(code, new Lobby(code));
+      currentLobby = code;
+      const isHost = lobbies.get(code).addPlayer(socket, username);
+      socket.emit('lobby-created', code);
+    } catch (error) {
+      socket.emit('error', error.message);
+    }
   });
   
   socket.on('join-lobby', ({ code, username }) => {
-    const lobby = lobbies.get(code);
+    const lobby = lobbies.get(code.toLowerCase());
     if (!lobby) return socket.emit('error', 'Invalid lobby code');
     
     try {
-      lobby.addPlayer(socket, username);
-      currentLobby = code;
-      socket.emit('lobby-joined');
+      const isHost = lobby.addPlayer(socket, username);
+      currentLobby = code.toLowerCase();
+      socket.emit('lobby-joined', Array.from(lobby.players.values())[0].username);
     } catch (error) {
       socket.emit('error', error.message);
     }
@@ -122,16 +133,6 @@ io.on('connection', (socket) => {
     }
   });
 });
-
-function generateLobbyCode() {
-  let code;
-  do {
-    code = generateSlug(2, { format: 'kebab' });
-  } while ([...lobbies.keys()].some(
-      existing => existing.toLowerCase() === code
-    ));
-  return code;
-}
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
