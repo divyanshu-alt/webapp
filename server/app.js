@@ -2,11 +2,18 @@ const express = require('express');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
-const randomWords = require('random-words');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
+let randomWords;
+import('random-words').then(module => {
+  randomWords = module.default;
+}).catch(err => {
+  console.error('Failed to import random-words:', err);
+  process.exit(1);
+});
 
 const PORT = 3000;
 const PUBLIC = path.join(__dirname, '../public');
@@ -81,15 +88,20 @@ class Lobby {
 // Socket.IO handlers
 io.on('connection', (socket) => {
   let currentLobby = null;
-  
-  socket.on('create-lobby', (username) => {
-    const code = generateLobbyCode();
-    lobbies.set(code, new Lobby(code));
-    currentLobby = code;
-    lobbies.get(code).addPlayer(socket, username);
-    socket.emit('lobby-created', code);
+
+  // When creating a lobby:
+  socket.on('create-lobby', async (username) => {
+    try {
+      const code = await generateLobbyCode();
+      lobbies.set(code, new Lobby(code));
+      currentLobby = code;
+      lobbies.get(code).addPlayer(socket, username);
+      socket.emit('lobby-created', code);
+    } catch (err) {
+      socket.emit('error', 'Failed to create lobby');
+    }
   });
-  
+
   socket.on('join-lobby', ({ code, username }) => {
     const lobby = lobbies.get(code);
     if (!lobby) return socket.emit('error', 'Invalid lobby code');
@@ -122,24 +134,19 @@ io.on('connection', (socket) => {
   });
 });
 
-function generateLobbyCode() {
+// Then modify generateLobbyCode to be async:
+async function generateLobbyCode() {
+  if (!randomWords) await import('random-words').then(module => {
+    randomWords = module.default;
+  });
+  
   let code;
   do {
-    // Generate 2 lowercase words joined with hyphen
-    code = randomWords({ exactly: 2, join: '-' });
-    
-    // Store lowercase version for case-insensitive comparison
-    const codeLower = code.toLowerCase();
-    
-    // Check against existing lobbies (case-insensitive)
-    const codeExists = Array.from(lobbies.keys()).some(
-      existingCode => existingCode.toLowerCase() === codeLower
-    );
-    
-  } while (codeExists); // Keep trying if code exists (case-insensitive)
-  
-  // Return the lowercase version for consistency
-  return code.toLowerCase();
+    code = (await randomWords({ exactly: 2, join: '-' })).toLowerCase();
+  } while ([...lobbies.keys()].some(
+      existing => existing.toLowerCase() === code
+    ));
+  return code;
 }
 
 server.listen(PORT, () => {
