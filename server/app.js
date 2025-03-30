@@ -3,17 +3,11 @@ const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
 
+const { generateSlug } = require('random-word-slugs');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-
-let randomWords;
-import('random-words').then(module => {
-  randomWords = module.default;
-}).catch(err => {
-  console.error('Failed to import random-words:', err);
-  process.exit(1);
-});
 
 const PORT = 3000;
 const PUBLIC = path.join(__dirname, '../public');
@@ -88,22 +82,15 @@ class Lobby {
 // Socket.IO handlers
 io.on('connection', (socket) => {
   let currentLobby = null;
-
-  // When creating a lobby:
-  socket.on('create-lobby', async (username) => {
-    try {
-      const code = await generateLobbyCode();
-      lobbies.set(code, new Lobby(code));
-      currentLobby = code;
-      lobbies.get(code).addPlayer(socket, username);
-      socket.emit('lobby-created', code);
-    } catch (err) {
-      console.log('Failed to create lobby');
-      console.log(err);
-      socket.emit('error', 'Failed to create lobby');
-    }
+  
+  socket.on('create-lobby', (username) => {
+    const code = generateLobbyCode();
+    lobbies.set(code, new Lobby(code));
+    currentLobby = code;
+    lobbies.get(code).addPlayer(socket, username);
+    socket.emit('lobby-created', code);
   });
-
+  
   socket.on('join-lobby', ({ code, username }) => {
     const lobby = lobbies.get(code);
     if (!lobby) return socket.emit('error', 'Invalid lobby code');
@@ -136,15 +123,10 @@ io.on('connection', (socket) => {
   });
 });
 
-// Then modify generateLobbyCode to be async:
-async function generateLobbyCode() {
-  if (!randomWords) await import('random-words').then(module => {
-    randomWords = module.default;
-  });
-  
+function generateLobbyCode() {
   let code;
   do {
-    code = (await randomWords({ exactly: 2, join: '-' })).toLowerCase();
+    code = generateSlug(2, { format: 'kebab' });
   } while ([...lobbies.keys()].some(
       existing => existing.toLowerCase() === code
     ));
