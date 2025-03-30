@@ -5,6 +5,7 @@ divyanshuverma.in, www.divyanshuverma.in {
   @backend {
     path /api/*
     path /game/*
+    path /socket.io*
   }
 
   reverse_proxy @backend app:3000
