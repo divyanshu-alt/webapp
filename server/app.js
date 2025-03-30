@@ -3,6 +3,7 @@ const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
 const { generateSlug } = require('random-word-slugs');
+const chalk = require('chalk');
 
 const app = express();
 const server = http.createServer(app);
@@ -10,44 +11,60 @@ const io = new Server(server);
 
 const PORT = 3000;
 const PUBLIC = path.join(__dirname, '../public');
+const COLOR_PALETTE = [
+  '#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff',
+  '#55efc4', '#ff7675', '#a29bfe', '#ffeaa7', '#81ecec'
+];
 
 app.use(express.static(PUBLIC));
-
-// Lobby management
-const lobbies = new Map();
 
 class Lobby {
   constructor(code) {
     this.code = code;
     this.players = new Map();
+    this.messages = [];
     this.createdAt = Date.now();
-    this.timeout = setTimeout(() => this.disband(), 60 * 60 * 1000);
+    this.timeout = setTimeout(() => {
+      console.log(chalk.red(`Lobby ${code} expired`));
+      this.disband();
+    }, 60 * 60 * 1000);
+    console.log(chalk.green(`Lobby created: ${code}`));
   }
   
   addPlayer(socket, username) {
     if (this.players.size >= 50) throw new Error('Lobby is full');
     
-    const isFirstPlayer = this.players.size === 0;
-    this.players.set(socket.id, {
+    const color = COLOR_PALETTE[this.players.size % COLOR_PALETTE.length];
+    const playerData = {
       username,
+      color,
       lastActive: Date.now(),
       timeout: setInterval(() => {
         if (Date.now() - this.players.get(socket.id).lastActive > 600000) {
+          console.log(chalk.yellow(`Player ${username} kicked for inactivity`));
           this.removePlayer(socket.id, 'inactivity');
         }
       }, 30000)
+    };
+    
+    this.players.set(socket.id, playerData);
+    socket.join(this.code);
+    
+    // Send lobby info and history to new player
+    socket.emit('lobby-info', {
+      code: this.code,
+      createdAt: this.createdAt,
+      color: playerData.color,
+      players: this.getPlayerList(),
+      messages: this.messages
     });
     
-    socket.join(this.code);
-    this.updateActivity(socket.id);
+    // Notify others
     this.broadcastPlayerList();
+    this.addSystemMessage(`${username} joined`, 'join');
     
-    // Notify about new player (except the joining player)
-    if (!isFirstPlayer) {
-      socket.to(this.code).emit('player-joined', username);
-    }
-    
-    return isFirstPlayer;
+    console.log(chalk.blue(`Player joined: ${username} in ${this.code}`));
+    return playerData;
   }
   
   removePlayer(socketId, reason) {
@@ -56,10 +73,7 @@ class Lobby {
     
     clearInterval(player.timeout);
     this.players.delete(socketId);
-    io.to(this.code).emit('player-left', {
-      username: player.username,
-      reason
-    });
+    this.addSystemMessage(`${player.username} left (${reason})`, 'leave');
     
     if (this.players.size === 0) {
       clearTimeout(this.timeout);
@@ -69,14 +83,42 @@ class Lobby {
     }
   }
   
-  updateActivity(socketId) {
-    const player = this.players.get(socketId);
-    if (player) player.lastActive = Date.now();
+  addSystemMessage(text, type) {
+    const message = {
+      type,
+      text,
+      timestamp: Date.now(),
+      system: true
+    };
+    this.messages.push(message);
+    io.to(this.code).emit('chat-message', message);
+  }
+  
+  addChatMessage(socket, message) {
+    const player = this.players.get(socket.id);
+    if (!player) return;
+    
+    const chatMessage = {
+      username: player.username,
+      color: player.color,
+      text: message,
+      timestamp: Date.now()
+    };
+    
+    this.messages.push(chatMessage);
+    io.to(this.code).emit('chat-message', chatMessage);
+  }
+  
+  getPlayerList() {
+    return Array.from(this.players.values()).map(player => ({
+      username: player.username,
+      color: player.color,
+      isHost: this.players.keys().next().value === player.socketId
+    }));
   }
   
   broadcastPlayerList() {
-    const players = Array.from(this.players.values()).map(p => p.username);
-    io.to(this.code).emit('player-list', players);
+    io.to(this.code).emit('player-list', this.getPlayerList());
   }
   
   disband() {
@@ -86,17 +128,18 @@ class Lobby {
   }
 }
 
-// Socket.IO handlers
+const lobbies = new Map();
+
 io.on('connection', (socket) => {
   let currentLobby = null;
   
   socket.on('create-lobby', (username) => {
     try {
       const code = generateSlug(2, { format: 'kebab' });
-      lobbies.set(code, new Lobby(code));
+      const lobby = new Lobby(code);
+      lobbies.set(code, lobby);
       currentLobby = code;
-      const isHost = lobbies.get(code).addPlayer(socket, username);
-      socket.emit('lobby-created', code);
+      lobby.addPlayer(socket, username);
     } catch (error) {
       socket.emit('error', error.message);
     }
@@ -107,9 +150,8 @@ io.on('connection', (socket) => {
     if (!lobby) return socket.emit('error', 'Invalid lobby code');
     
     try {
-      const isHost = lobby.addPlayer(socket, username);
       currentLobby = code.toLowerCase();
-      socket.emit('lobby-joined', Array.from(lobby.players.values())[0].username);
+      lobby.addPlayer(socket, username);
     } catch (error) {
       socket.emit('error', error.message);
     }
@@ -119,21 +161,15 @@ io.on('connection', (socket) => {
     const lobby = lobbies.get(currentLobby);
     if (!lobby) return;
     
-    lobby.updateActivity(socket.id);
-    io.to(currentLobby).emit('chat-message', {
-      username: lobby.players.get(socket.id).username,
-      message
-    });
+    lobby.addChatMessage(socket, message);
   });
   
   socket.on('disconnect', () => {
-    if (currentLobby) {
-      const lobby = lobbies.get(currentLobby);
-      if (lobby) lobby.removePlayer(socket.id, 'disconnection');
-    }
+    const lobby = lobbies.get(currentLobby);
+    if (lobby) lobby.removePlayer(socket.id, 'disconnected');
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(chalk.cyan(`Server running on port ${PORT}`));
 });

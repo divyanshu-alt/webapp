@@ -12,6 +12,7 @@
     "express": "^4.18.2",
     "path": "^0.12.7",
     "random-word-slugs": "^0.1.7",
+    "chalk": "^5.4.1",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
