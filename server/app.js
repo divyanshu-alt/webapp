@@ -3,7 +3,6 @@ const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
 const { generateSlug } = require('random-word-slugs');
-const chalk = require('chalk');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,10 +24,10 @@ class Lobby {
     this.messages = [];
     this.createdAt = Date.now();
     this.timeout = setTimeout(() => {
-      console.log(chalk.red(`Lobby ${code} expired`));
+      console.log(`[LOBBY EXPIRED] ${code}`);
       this.disband();
     }, 60 * 60 * 1000);
-    console.log(chalk.green(`Lobby created: ${code}`));
+    console.log(`[LOBBY CREATED] ${code}`);
   }
   
   addPlayer(socket, username) {
@@ -41,7 +40,7 @@ class Lobby {
       lastActive: Date.now(),
       timeout: setInterval(() => {
         if (Date.now() - this.players.get(socket.id).lastActive > 600000) {
-          console.log(chalk.yellow(`Player ${username} kicked for inactivity`));
+          console.log(`[INACTIVITY] Kicked ${username} from ${this.code}`);
           this.removePlayer(socket.id, 'inactivity');
         }
       }, 30000)
@@ -63,7 +62,7 @@ class Lobby {
     this.broadcastPlayerList();
     this.addSystemMessage(`${username} joined`, 'join');
     
-    console.log(chalk.blue(`Player joined: ${username} in ${this.code}`));
+    console.log(`[PLAYER JOINED] ${username} in ${this.code}`);
     return playerData;
   }
   
@@ -81,6 +80,7 @@ class Lobby {
     } else {
       this.broadcastPlayerList();
     }
+    console.log(`[PLAYER LEFT] ${player.username} from ${this.code} (Reason: ${reason})`);
   }
   
   addSystemMessage(text, type) {
@@ -141,18 +141,23 @@ io.on('connection', (socket) => {
       currentLobby = code;
       lobby.addPlayer(socket, username);
     } catch (error) {
+      console.error(`[LOBBY ERROR] ${error.message}`);
       socket.emit('error', error.message);
     }
   });
   
   socket.on('join-lobby', ({ code, username }) => {
     const lobby = lobbies.get(code.toLowerCase());
-    if (!lobby) return socket.emit('error', 'Invalid lobby code');
+    if (!lobby) {
+      console.log(`[INVALID LOBBY] Attempt to join ${code}`);
+      return socket.emit('error', 'Invalid lobby code');
+    }
     
     try {
       currentLobby = code.toLowerCase();
       lobby.addPlayer(socket, username);
     } catch (error) {
+      console.error(`[JOIN ERROR] ${error.message}`);
       socket.emit('error', error.message);
     }
   });
@@ -166,10 +171,13 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {
     const lobby = lobbies.get(currentLobby);
-    if (lobby) lobby.removePlayer(socket.id, 'disconnected');
+    if (lobby) {
+      console.log(`[DISCONNECT] Player from ${currentLobby}`);
+      lobby.removePlayer(socket.id, 'disconnected');
+    }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(chalk.cyan(`Server running on port ${PORT}`));
+  console.log(`Server running on port ${PORT}`);
 });
