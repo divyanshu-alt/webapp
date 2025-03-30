@@ -6,7 +6,7 @@
     <title>Game Lobby</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/lib/browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
         :root {
             --bg-dark: #0f172a;
@@ -399,10 +399,13 @@
             }
         }
         
-        function showShareModal() {
-            shareModal.style.display = 'flex';
-            generateQRCode();
-        }
+         function showShareModal() {
+           if (!currentLobby) return;
+           
+           const modal = document.getElementById('share-modal');
+           modal.style.display = 'flex';
+           generateQRCode();
+         }
         
         function closeShareModal() {
             shareModal.style.display = 'none';
@@ -417,20 +420,16 @@
         }
         
         function generateQRCode() {
-            const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
-            if (qrCode) {
-                qrCode.clear();
-                qrCode.makeCode(lobbyUrl);
-            } else {
-                qrCode = new QRCode(document.getElementById('qrcode'), {
-                    text: lobbyUrl,
-                    width: 200,
-                    height: 200,
-                    colorDark: "#000000",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.L
-                });
-            }
+         try {
+           const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
+           const qr = qrcode(0, 'L'); // Error correction level L
+           qr.addData(lobbyUrl);
+           qr.make();
+           document.getElementById('qrcode').innerHTML = qr.createImgTag(4); // 4px module size
+         } catch (err) {
+           console.error('QR generation failed:', err);
+           document.getElementById('qrcode').innerHTML = '<p>Could not generate QR code</p>';
+         }
         }
         
         function updateTimer(createdAt) {
@@ -540,6 +539,10 @@
             addMessage('System: You have been disconnected', true, 'error');
             document.getElementById('message-input').disabled = true;
             document.getElementById('send-btn').disabled = true;
+            
+            // Stop the lobby timer
+            clearInterval(lobbyTimer);
+            document.getElementById('time-remaining').textContent = 'Disconnected';
         });
         
         // Close modal when clicking outside
