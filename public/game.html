@@ -214,11 +214,13 @@
 
         .chat-input {
             display: flex;
-            gap: 12px;
+            gap: 10px;
+            align-items: center;
         }
 
         #message-input {
             flex: 1;
+            min-width: 150px;
         }
 
         .share-fab {
@@ -272,6 +274,12 @@
             border-radius: 8px;
             display: inline-block;
         }
+        
+        #send-btn {
+          width: auto;
+          padding: 12px 20px;
+          white-space: nowrap;
+        }
 
         @media (max-width: 768px) {
             .main-actions {
@@ -287,6 +295,21 @@
                 gap: 12px;
                 text-align: center;
             }
+        }
+        
+        @media (max-width: 600px) {
+          .chat-input {
+              flex-direction: row;
+          }
+          #message-input {
+              min-width: 120px;
+          }
+        }
+        
+        @media (max-width:480px) {
+          #send-btn {
+            padding: 12px 16px;
+          }
         }
     </style>
 </head>
