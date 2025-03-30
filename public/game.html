@@ -9,16 +9,29 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --bg-darker: #0a1122;
-            --primary: #818cf8;
-            --primary-light: #a5b4fc;
-            --text: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --success: #34d399;
-            --error: #f87171;
-            --card-bg: #1e293b;
-            --border: #334155;
+            /* Color Scheme */
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --secondary: #f472b6;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            
+            /* Effects */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* Player Colors */
+            --player-colors: #6366f1, #f472b6, #10b981, #f59e0b, #8b5cf6, #ec4899, #14b8a6, #f97316;
         }
 
         * {
@@ -29,96 +42,171 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text);
+            background-color: var(--background);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Auth Flow */
+        .auth-container {
             display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: white;
-        }
-
-        .main-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .action-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .auth-flow {
+            width: 100%;
+            max-width: 480px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container {
+            transition: transform 0.3s ease;
+            display: flex;
+            width: 200%;
+        }
+
+        .form-card {
+            width: 50%;
+            padding: 0 20px;
+            opacity: 0;
+            transform: translateX(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+
+        .form-card.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .form-header {
             text-align: center;
-            transition: transform 0.2s;
-            border: 1px solid var(--border);
+            margin-bottom: 32px;
         }
 
-        .action-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-card .material-icons {
+        .form-header .icon {
             font-size: 48px;
-            color: var(--primary);
             margin-bottom: 16px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .form-header h1 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.875rem;
         }
 
         input {
             width: 100%;
             padding: 12px 16px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background-color: var(--bg-darker);
-            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
             font-size: 1rem;
-            margin-bottom: 16px;
+            transition: all 0.2s;
+            background-color: var(--surface);
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
         .btn {
-            background-color: var(--primary);
-            color: white;
+            width: 100%;
+            padding: 14px;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
             font-size: 1rem;
-            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn:hover {
-            background-color: var(--primary-light);
+            background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
-        .lobby-interface {
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .switch-form button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.875rem;
+        }
+
+        /* Lobby Interface */
+        .lobby-container {
             display: none;
-            flex: 1;
-            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
         }
 
         .lobby-header {
@@ -126,345 +214,449 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
-            background-color: var(--card-bg);
-            padding: 16px 24px;
-            border-radius: 12px;
+            background: var(--surface);
+            padding: 20px 24px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .lobby-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .lobby-code {
             font-family: monospace;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 600;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .time-remaining {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lobby-actions {
+            display: flex;
+            gap: 12px;
         }
 
         .players-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .player-card {
-            background-color: var(--bg-darker);
-            padding: 12px;
-            border-radius: 8px;
+            background: var(--surface);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+            position: relative;
             border-left: 4px solid var(--player-color);
-            transition: transform 0.2s;
         }
 
         .player-card:hover {
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .player-card.host::after {
             content: "👑";
-            margin-left: 8px;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 1rem;
+        }
+
+        .player-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .player-status {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
         }
 
         .chat-container {
             display: flex;
             flex-direction: column;
-            flex: 1;
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            height: 400px;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
         }
 
         #messages {
             flex: 1;
             overflow-y: auto;
-            margin-bottom: 16px;
-            padding-right: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .message {
-            margin-bottom: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            background-color: var(--bg-darker);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            max-width: 80%;
+            width: fit-content;
+            font-size: 0.875rem;
+            line-height: 1.5;
         }
 
         .message.system {
+            align-self: center;
+            background-color: rgba(100, 116, 139, 0.1);
             color: var(--text-secondary);
             font-style: italic;
         }
 
         .message.join {
-            border-left: 3px solid var(--success);
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
         }
 
         .message.leave {
-            border-left: 3px solid var(--error);
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
         }
 
         .message.user {
-            border-left: 3px solid var(--message-color);
+            background-color: var(--message-bg);
+            color: var(--message-color);
+            align-self: flex-end;
+            margin-left: auto;
         }
 
         .message .sender {
             font-weight: 600;
-            color: var(--message-color);
+            margin-bottom: 4px;
         }
 
-        .chat-input {
+        .chat-input-container {
+            padding: 16px;
+            border-top: 1px solid var(--border);
             display: flex;
-            gap: 10px;
-            align-items: center;
+            gap: 12px;
         }
 
         #message-input {
             flex: 1;
-            min-width: 150px;
+            min-width: 120px;
         }
 
-        .share-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: transform 0.2s;
+        #send-btn {
+            width: auto;
+            padding: 0 20px;
         }
 
-        .share-fab:hover {
-            transform: scale(1.1);
-        }
-
-        .modal {
+        /* Share Modal */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 200;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 24px;
         }
 
         .modal-content {
-            background-color: var(--card-bg);
+            background: var(--surface);
+            border-radius: var(--radius-md);
             padding: 24px;
-            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg);
             text-align: center;
-            max-width: 90%;
-            width: 400px;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
         }
 
         #qrcode {
-            margin: 0 auto 20px;
+            margin: 0 auto;
             padding: 12px;
             background: white;
             border-radius: 8px;
             display: inline-block;
         }
-        
-        #send-btn {
-          width: auto;
-          padding: 12px 20px;
-          white-space: nowrap;
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            .main-actions {
-                grid-template-columns: 1fr;
-            }
-            
-            .players-container {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            .auth-flow {
+                padding: 32px 24px;
             }
             
             .lobby-header {
                 flex-direction: column;
-                gap: 12px;
-                text-align: center;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .lobby-actions {
+                width: 100%;
+            }
+            
+            .players-container {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .chat-input-container {
+                flex-direction: column;
+            }
+            
+            #send-btn {
+                width: 100%;
             }
         }
-        
-        @media (max-width: 600px) {
-          .chat-input {
-              flex-direction: row;
-          }
-          #message-input {
-              min-width: 120px;
-          }
-        }
-        
-        @media (max-width:480px) {
-          #send-btn {
-            padding: 12px 16px;
-          }
+
+        @media (max-width: 480px) {
+            .auth-flow {
+                padding: 24px 16px;
+            }
+            
+            .form-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .players-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="main-actions" class="main-actions">
-            <div class="action-card" id="create-card">
-                <i class="material-icons">add_circle</i>
-                <h2>Create Lobby</h2>
-                <input type="text" id="username" placeholder="Your name" autocapitalize="none" autocorrect="off">
-                <button class="btn" id="create-btn">Create</button>
+    <!-- Auth Flow Container -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-flow">
+            <div class="form-container" id="formContainer">
+                <!-- Create Lobby Form -->
+                <div class="form-card" id="createForm">
+                    <div class="form-header">
+                        <div class="icon">
+                            <i class="material-icons">group_add</i>
+                        </div>
+                        <h1>Create New Lobby</h1>
+                        <p>Start a new gaming session with friends</p>
+                    </div>
+                    <div class="input-group">
+                        <label for="username">Your Name</label>
+                        <input type="text" id="username" placeholder="Enter your name" autocapitalize="none" autocorrect="off">
+                    </div>
+                    <button class="btn" onclick="createLobby()">
+                        <i class="material-icons">add</i>
+                        Create Lobby
+                    </button>
+                    <div class="switch-form">
+                        <span>Already have a code? </span>
+                        <button onclick="showJoinForm()">Join Lobby</button>
+                    </div>
+                </div>
+
+                <!-- Join Lobby Form -->
+                <div class="form-card" id="joinForm">
+                    <div class="form-header">
+                        <div class="icon" style="background-color: rgba(244, 114, 182, 0.1); color: var(--secondary);">
+                            <i class="material-icons">login</i>
+                        </div>
+                        <h1>Join Existing Lobby</h1>
+                        <p>Enter your lobby code to join friends</p>
+                    </div>
+                    <div class="input-group">
+                        <label for="joinUsername">Your Name</label>
+                        <input type="text" id="joinUsername" placeholder="Enter your name" autocapitalize="none" autocorrect="off">
+                    </div>
+                    <div class="input-group">
+                        <label for="lobbyCode">Lobby Code</label>
+                        <input type="text" id="lobbyCode" placeholder="Enter lobby code" autocapitalize="none" autocorrect="off">
+                    </div>
+                    <button class="btn" onclick="joinLobby()">
+                        <i class="material-icons">login</i>
+                        Join Lobby
+                    </button>
+                    <div class="switch-form">
+                        <span>Need to create? </span>
+                        <button onclick="showCreateForm()">Create Lobby</button>
+                    </div>
+                </div>
             </div>
-            
-            <div class="action-card" id="join-card">
-                <i class="material-icons">group_add</i>
-                <h2>Join Lobby</h2>
-                <input type="text" id="join-username" placeholder="Your name" autocapitalize="none" autocorrect="off">
-                <input type="text" id="lobby-code" placeholder="Lobby code" autocapitalize="none" autocorrect="off">
-                <button class="btn" id="join-btn">Join</button>
+        </div>
+    </div>
+
+    <!-- Lobby Interface -->
+    <div class="lobby-container" id="lobbyContainer">
+        <div class="lobby-header">
+            <div class="lobby-meta">
+                <div class="lobby-code">
+                    <i class="material-icons">meeting_room</i>
+                    <span id="lobbyCodeDisplay"></span>
+                </div>
+                <div class="time-remaining">
+                    <i class="material-icons">schedule</i>
+                    <span id="timeRemaining"></span>
+                </div>
+            </div>
+            <div class="lobby-actions">
+                <button class="btn btn-secondary" onclick="showShareModal()">
+                    <i class="material-icons">share</i>
+                    Share
+                </button>
             </div>
         </div>
         
-        <div id="lobby-interface" class="lobby-interface">
-            <div class="lobby-header">
-                <div>
-                    <div class="lobby-code" id="lobby-code-display"></div>
-                    <div class="time-remaining" id="time-remaining"></div>
-                </div>
+        <div class="players-container" id="playersContainer"></div>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <h3>Lobby Chat</h3>
             </div>
-            
-            <div class="players-container" id="players-container"></div>
-            
-            <div class="chat-container">
-                <div id="messages"></div>
-                <div class="chat-input">
-                    <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
-                    <button class="btn" id="send-btn">Send</button>
-                </div>
+            <div id="messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="messageInput" placeholder="Type your message..." autocomplete="off">
+                <button class="btn" id="sendBtn">
+                    <i class="material-icons">send</i>
+                    Send
+                </button>
             </div>
         </div>
     </div>
-    
-    <div class="share-fab" id="share-fab">
-        <i class="material-icons">share</i>
-    </div>
-    
-    <div class="modal" id="share-modal">
+
+    <!-- Share Modal -->
+    <div class="modal-overlay" id="shareModal">
         <div class="modal-content">
-            <h3>Invite Players</h3>
-            <div id="qrcode"></div>
-            <button class="btn" id="copy-link-btn">Copy Link</button>
+            <div class="modal-header">
+                <h3>Invite Players</h3>
+                <p>Share this lobby with others</p>
+            </div>
+            <div class="modal-body">
+                <div id="qrcode"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="copyLobbyLink()">
+                    <i class="material-icons">content_copy</i>
+                    Copy Link
+                </button>
+                <button class="btn" onclick="shareViaNative()">
+                    <i class="material-icons">share</i>
+                    Share
+                </button>
+            </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // DOM Elements
+        const authContainer = document.getElementById('authContainer');
+        const lobbyContainer = document.getElementById('lobbyContainer');
+        const formContainer = document.getElementById('formContainer');
+        const createForm = document.getElementById('createForm');
+        const joinForm = document.getElementById('joinForm');
+        const shareModal = document.getElementById('shareModal');
+        
+        // Socket and state management
         const socket = io();
         let currentLobby = null;
         let playerColor = '';
-        let lobbyTimer;
-        let qrCode;
-        
-        // DOM Elements
-        const mainActions = document.getElementById('main-actions');
-        const lobbyInterface = document.getElementById('lobby-interface');
-        const shareFab = document.getElementById('share-fab');
-        const shareModal = document.getElementById('share-modal');
-        const copyLinkBtn = document.getElementById('copy-link-btn');
-        
-        // Initialize
-        document.getElementById('create-btn').addEventListener('click', createLobby);
-        document.getElementById('join-btn').addEventListener('click', joinLobby);
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
-        document.getElementById('message-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-        shareFab.addEventListener('click', showShareModal);
-        copyLinkBtn.addEventListener('click', copyLobbyLink);
-        
-        // Check for lobby code in URL
+        let lobbyTimer = null;
+        let qrCode = null;
+
+        // Initialize based on URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('lobby')) {
-            document.getElementById('lobby-code').value = urlParams.get('lobby');
-            document.getElementById('join-card').scrollIntoView();
+            showJoinForm();
+            document.getElementById('lobbyCode').value = urlParams.get('lobby');
+        } else {
+            showCreateForm();
         }
-        
+
+        // Form handling
+        function showCreateForm() {
+            formContainer.style.transform = 'translateX(0)';
+            createForm.classList.add('active');
+            joinForm.classList.remove('active');
+        }
+
+        function showJoinForm() {
+            formContainer.style.transform = 'translateX(-50%)';
+            joinForm.classList.add('active');
+            createForm.classList.remove('active');
+        }
+
         function createLobby() {
             const username = document.getElementById('username').value.trim();
-            if (!username) return showError('Please enter a username');
+            if (!username) return showError('Please enter your name');
             
             socket.emit('create-lobby', username);
         }
-        
+
         function joinLobby() {
-            const username = document.getElementById('join-username').value.trim();
-            const code = document.getElementById('lobby-code').value.trim().toLowerCase();
+            const username = document.getElementById('joinUsername').value.trim();
+            const code = document.getElementById('lobbyCode').value.trim().toLowerCase();
             
-            if (!username) return showError('Please enter a username');
+            if (!username) return showError('Please enter your name');
             if (!code) return showError('Please enter a lobby code');
             
             socket.emit('join-lobby', { code, username });
         }
-        
-        function sendMessage() {
-            const input = document.getElementById('message-input');
-            const message = input.value.trim();
-            if (message) {
-                socket.emit('chat-message', message);
-                input.value = '';
-            }
-        }
-        
-         function showShareModal() {
-           if (!currentLobby) return;
-           
-           const modal = document.getElementById('share-modal');
-           modal.style.display = 'flex';
-           generateQRCode();
-         }
-        
-        function closeShareModal() {
-            shareModal.style.display = 'none';
-        }
-        
-        function copyLobbyLink() {
-            const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
-            navigator.clipboard.writeText(lobbyUrl).then(() => {
-                addMessage('System: Lobby link copied to clipboard', true, 'system');
-                closeShareModal();
-            });
-        }
-        
-        function generateQRCode() {
-         try {
-           const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
-           const qr = qrcode(0, 'L'); // Error correction level L
-           qr.addData(lobbyUrl);
-           qr.make();
-           document.getElementById('qrcode').innerHTML = qr.createImgTag(4); // 4px module size
-         } catch (err) {
-           console.error('QR generation failed:', err);
-           document.getElementById('qrcode').innerHTML = '<p>Could not generate QR code</p>';
-         }
-        }
-        
+
+        // Lobby functions
         function updateTimer(createdAt) {
+            clearInterval(lobbyTimer);
             const lobbyDuration = 60 * 60 * 1000; // 1 hour
             const endTime = createdAt + lobbyDuration;
-            
-            clearInterval(lobbyTimer);
             
             function update() {
                 const remaining = endTime - Date.now();
                 if (remaining <= 0) {
-                    document.getElementById('time-remaining').textContent = 'Lobby expired';
+                    document.getElementById('timeRemaining').textContent = 'Lobby expired';
                     clearInterval(lobbyTimer);
                     return;
                 }
@@ -477,13 +669,24 @@
                 if (hours > 0) timeString += `${hours}h `;
                 timeString += `${minutes}m ${seconds}s`;
                 
-                document.getElementById('time-remaining').textContent = `Time left: ${timeString}`;
+                document.getElementById('timeRemaining').textContent = timeString;
             }
             
             update();
             lobbyTimer = setInterval(update, 1000);
         }
-        
+
+        function renderPlayers(players) {
+            const container = document.getElementById('playersContainer');
+            container.innerHTML = players.map(player => `
+                <div class="player-card ${player.isHost ? 'host' : ''}" 
+                     style="--player-color: ${player.color}">
+                    <div class="player-name">${player.username}</div>
+                    <div class="player-status">${player.isHost ? 'Host' : 'Player'}</div>
+                </div>
+            `).join('');
+        }
+
         function addMessage(content, isSystem = false, type = '') {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
@@ -493,46 +696,83 @@
                 messageDiv.textContent = content;
             } else {
                 messageDiv.className = 'message user';
+                messageDiv.style.setProperty('--message-bg', `${content.color}20`);
                 messageDiv.style.setProperty('--message-color', content.color);
-                messageDiv.innerHTML = `<span class="sender">${content.username}:</span> ${content.text}`;
+                messageDiv.innerHTML = `
+                    <div class="sender">${content.username}</div>
+                    <div>${content.text}</div>
+                `;
             }
             
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-        
+
         function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'message system error';
-            errorDiv.textContent = `Error: ${message}`;
-            document.getElementById('messages').appendChild(errorDiv);
+            addMessage(`Error: ${message}`, true, 'error');
         }
-        
-        function renderPlayers(players) {
-            const container = document.getElementById('players-container');
-            container.innerHTML = players.map(player => `
-                <div class="player-card ${player.isHost ? 'host' : ''}" 
-                     style="--player-color: ${player.color}">
-                    ${player.username}
-                </div>
-            `).join('');
+
+        // Share functionality
+        function showShareModal() {
+            if (!currentLobby) return;
+            shareModal.style.display = 'flex';
+            generateQRCode();
         }
-        
+
+        function closeShareModal() {
+            shareModal.style.display = 'none';
+        }
+
+        function generateQRCode() {
+            try {
+                const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
+                const qr = qrcode(0, 'L');
+                qr.addData(lobbyUrl);
+                qr.make();
+                document.getElementById('qrcode').innerHTML = qr.createImgTag(4);
+            } catch (err) {
+                console.error('QR generation failed:', err);
+                document.getElementById('qrcode').innerHTML = '<p>Could not generate QR code</p>';
+            }
+        }
+
+        function copyLobbyLink() {
+            const lobbyUrl = `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`;
+            navigator.clipboard.writeText(lobbyUrl).then(() => {
+                addMessage('System: Lobby link copied to clipboard', true, 'system');
+                closeShareModal();
+            });
+        }
+
+        function shareViaNative() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Join my game lobby',
+                    text: `Join my game lobby using code: ${currentLobby}`,
+                    url: `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`
+                }).catch(err => {
+                    console.log('Error sharing:', err);
+                });
+            } else {
+                copyLobbyLink();
+            }
+        }
+
         // Socket event handlers
         socket.on('lobby-info', (data) => {
             currentLobby = data.code;
             playerColor = data.color;
             
+            // Switch to lobby view
+            authContainer.style.display = 'none';
+            lobbyContainer.style.display = 'block';
+            
             // Update UI
-            mainActions.style.display = 'none';
-            lobbyInterface.style.display = 'flex';
-            document.getElementById('lobby-code-display').textContent = data.code;
-            
-            // Set up timer
+            document.getElementById('lobbyCodeDisplay').textContent = data.code;
             updateTimer(data.createdAt);
-            
-            // Render initial players and messages
             renderPlayers(data.players);
+            
+            // Load message history
             data.messages.forEach(msg => {
                 if (msg.system) {
                     addMessage(msg.text, true, msg.type);
@@ -541,11 +781,11 @@
                 }
             });
         });
-        
+
         socket.on('player-list', (players) => {
             renderPlayers(players);
         });
-        
+
         socket.on('chat-message', (message) => {
             if (message.system) {
                 addMessage(message.text, true, message.type);
@@ -553,21 +793,34 @@
                 addMessage(message);
             }
         });
-        
+
         socket.on('error', (message) => {
             showError(message);
         });
-        
+
         socket.on('disconnect', () => {
             addMessage('System: You have been disconnected', true, 'error');
-            document.getElementById('message-input').disabled = true;
-            document.getElementById('send-btn').disabled = true;
-            
-            // Stop the lobby timer
+            document.getElementById('messageInput').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
             clearInterval(lobbyTimer);
-            document.getElementById('time-remaining').textContent = 'Disconnected';
         });
-        
+
+        // Chat message sending
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (message) {
+                socket.emit('chat-message', message);
+                input.value = '';
+                input.focus();
+            }
+        }
+
         // Close modal when clicking outside
         shareModal.addEventListener('click', (e) => {
             if (e.target === shareModal) closeShareModal();
