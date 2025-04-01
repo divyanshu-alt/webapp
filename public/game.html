@@ -773,6 +773,7 @@
           });
           
           socket.on('reconnect-success', (data) => {
+            console.log('Reconnected to lobby:', data.code, 'New socket ID:', socket.id);
             isConnected = true;
             isReconnecting = false;
             currentLobby = data.code;
@@ -799,6 +800,11 @@
                 addMessage(msg);
               }
             });
+            
+            document.getElementById('sendBtn').onclick = sendMessage;
+            document.getElementById('messageInput').onkeypress = (e) => {
+              if(e.key == 'Enter') sendMessage();
+            };
           });
         }
         
@@ -983,6 +989,12 @@
         });
 
         function sendMessage() {
+            console.log('Attempting to send message. Connected:', isConnected, 'Lobby:', currentLobby);
+            if(!isConnected || !currentLobby) {
+              addMessage('System: Not connected to lobby', true, 'error');
+              return;
+            }
+            
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             if (message) {

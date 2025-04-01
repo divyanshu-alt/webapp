@@ -237,8 +237,12 @@ io.on('connection', (socket) => {
   });
   
   socket.on('chat-message', (message) => {
+    console.log(`[CHAT-MSG] From ${socket.id} in ${currentLobby}: ${message}`);
     const lobby = lobbies.get(currentLobby);
-    if (!lobby) return;
+    if (!lobby) {
+      console.log(`[ERROR] Lobby ${currentLobby} not found for ${socket.id}`);
+      return;
+    }
     
     lobby.addChatMessage(socket, message);
   });
