@@ -128,34 +128,40 @@ class Lobby {
   }
   
    canReconnect(socketId) {
-     const player = this.players.get(socketId);
-     if (!player) return false;
-     
-     // Check if player was disconnected but lobby still exists
-     return Date.now() - player.lastActive < 600000 && // Within 10 minute window
-       Date.now() - this.createdAt < 60 * 60 * 1000; // Lobby not expired
-   }
-   
-   reconnectPlayer(socket, socketId) {
-     const player = this.players.get(socketId);
-     if (!player) return false;
-     
-     clearInterval(player.timeout);
-     player.timeout = setInterval(() => {
-       if (Date.now() - player.lastActive > 600000) {
-         this.removePlayer(socket.id, 'inactivity');
-       }
-     }, 30000);
-     
-     player.lastActive = Date.now();
-     this.players.set(socket.id, player);
-     socket.join(this.code);
-     
-     this.broadcastSystemMessage(`${player.username} reconnected`, 'reconnect');
-     this.broadcastPlayerList();
-     
-     return true;
-   }
+      const player = this.players.get(socketId);
+      if (!player) return false;
+      
+      // Check if player was disconnected but lobby still exists
+      const isWithinTimeWindow = Date.now() - player.lastActive < 600000; // 10 minutes
+      const isLobbyValid = Date.now() - this.createdAt < 60 * 60 * 1000; // 1 hour
+      
+      return isWithinTimeWindow && isLobbyValid;
+    }
+    
+    reconnectPlayer(socket, socketId) {
+      const player = this.players.get(socketId);
+      if (!player) return false;
+      
+      // Update the player's socket reference
+      this.players.delete(socketId);
+      player.socketId = socket.id;
+      player.lastActive = Date.now();
+      this.players.set(socket.id, player);
+      
+      // Clear old interval and set new one
+      clearInterval(player.timeout);
+      player.timeout = setInterval(() => {
+        if (Date.now() - player.lastActive > 600000) {
+          this.removePlayer(socket.id, 'inactivity');
+        }
+      }, 30000);
+      
+      socket.join(this.code);
+      this.broadcastSystemMessage(`${player.username} reconnected`, 'reconnect');
+      this.broadcastPlayerList();
+      
+      return true;
+    }
 }
 
 const lobbies = new Map();
@@ -164,26 +170,39 @@ io.on('connection', (socket) => {
   let currentLobby = null;
   
    socket.on('reconnect-attempt', ({ previousSocketId, code, username }) => {
-     const lobby = lobbies.get(code.toLowerCase());
-     if (!lobby) return socket.emit('error', 'Lobby no longer exists');
-     
-     if (lobby.canReconnect(previousSocketId)) {
-       if (lobby.reconnectPlayer(socket, previousSocketId)) {
-         socket.emit('reconnect-success', {
-           code: lobby.code,
-           createdAt: lobby.createdAt,
-           color: lobby.players.get(socket.id).color,
-           players: lobby.getPlayerList(),
-           messages: lobby.messages
-         });
-         return;
-       }
-     }
-     
-     // Fall back to normal join if reconnect not possible
-     socket.emit('error', 'Could not reconnect - joining as new player');
-     lobby.addPlayer(socket, username);
-   });
+      const lobby = lobbies.get(code.toLowerCase());
+      if (!lobby) {
+        socket.emit('error', 'Lobby no longer exists');
+        return;
+      }
+      
+      if (previousSocketId && lobby.canReconnect(previousSocketId)) {
+        if (lobby.reconnectPlayer(socket, previousSocketId)) {
+          socket.emit('reconnect-success', {
+            code: lobby.code,
+            createdAt: lobby.createdAt,
+            color: lobby.players.get(socket.id).color,
+            players: lobby.getPlayerList(),
+            messages: lobby.messages
+          });
+          return;
+        }
+      }
+      
+      // Fall back to normal join if reconnect not possible
+      try {
+        lobby.addPlayer(socket, username);
+        socket.emit('lobby-info', {
+          code: lobby.code,
+          createdAt: lobby.createdAt,
+          color: lobby.players.get(socket.id).color,
+          players: lobby.getPlayerList(),
+          messages: lobby.messages
+        });
+      } catch (error) {
+        socket.emit('error', error.message);
+      }
+    });
    
   socket.on('create-lobby', (username) => {
     try {
