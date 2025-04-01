@@ -489,6 +489,35 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Add reconnect button styling */
+        .reconnect-container {
+          display: none;
+          text-align: center;
+          padding: 16px;
+          border-top: 1px solid var(--border);
+        }
+        
+        .reconnect-btn {
+          background: var(--primary);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: var(--radius-sm);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .reconnect-btn:hover {
+          background: var(--primary-hover);
+        }
+        
+        .disconnected-message {
+          color: var(--error);
+          font-style: italic;
+          margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -584,6 +613,10 @@
                     Send
                 </button>
             </div>
+            <div class="reconnect-container" id="reconnectContainer">
+              <div class="disconnected-message">You have been disconnected</div>
+              <button class="reconnect-btn" id="reconnectBtn">Reconnect to Lobby</button>
+            </div>
         </div>
     </div>
 
@@ -621,11 +654,14 @@
         const shareModal = document.getElementById('shareModal');
         
         // Socket and state management
-        const socket = io();
+        let socket = io();
         let currentLobby = null;
         let playerColor = '';
         let lobbyTimer = null;
         let qrCode = null;
+        let isConnected = true;
+        let lastKnownLobby = null;
+        let lastKnownUsername = null;
 
         // Initialize based on URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -776,52 +812,94 @@
                 copyLobbyLink();
             }
         }
-
-        // Socket event handlers
-        socket.on('lobby-info', (data) => {
-            currentLobby = data.code;
-            playerColor = data.color;
-            
-            // Switch to lobby view
-            authContainer.style.display = 'none';
-            lobbyContainer.style.display = 'block';
-            
-            // Update UI
-            document.getElementById('lobbyCodeDisplay').textContent = data.code;
-            updateTimer(data.createdAt);
-            renderPlayers(data.players);
-            
-            // Load message history
-            data.messages.forEach(msg => {
-                if (msg.system) {
-                    addMessage(msg.text, true, msg.type);
+        
+        function setupSocketHandlers() {
+            // Socket event handlers
+            socket.on('lobby-info', (data) => {
+                isConnected = true;
+                currentLobby = data.code;
+                playerColor = data.color;
+                
+                // Switch to lobby view
+                authContainer.style.display = 'none';
+                lobbyContainer.style.display = 'block';
+                
+                // Hide reconnect UI
+                document.getElementById('messageInput').style.display = '';
+                document.getElementById('sendBtn').style.display = '';
+                document.getElementById('reconnectContainer').style.display = 'none';
+     
+                // Update UI
+                document.getElementById('lobbyCodeDisplay').textContent = data.code;
+                updateTimer(data.createdAt);
+                renderPlayers(data.players);
+                
+                // Load message history
+                data.messages.forEach(msg => {
+                    if (msg.system) {
+                        addMessage(msg.text, true, msg.type);
+                    } else {
+                        addMessage(msg);
+                    }
+                });
+            });
+    
+            socket.on('player-list', (players) => {
+                renderPlayers(players);
+            });
+    
+            socket.on('chat-message', (message) => {
+                if (message.system) {
+                    addMessage(message.text, true, message.type);
                 } else {
-                    addMessage(msg);
+                    addMessage(message);
                 }
             });
-        });
-
-        socket.on('player-list', (players) => {
-            renderPlayers(players);
-        });
-
-        socket.on('chat-message', (message) => {
-            if (message.system) {
-                addMessage(message.text, true, message.type);
-            } else {
-                addMessage(message);
-            }
-        });
-
-        socket.on('error', (message) => {
-            showError(message);
-        });
-
-        socket.on('disconnect', () => {
-            addMessage('System: You have been disconnected', true, 'error');
-            document.getElementById('messageInput').disabled = true;
-            document.getElementById('sendBtn').disabled = true;
-            clearInterval(lobbyTimer);
+    
+            socket.on('error', (message) => {
+                showError(message);
+            });
+    
+            socket.on('disconnect', () => {
+              isConnected = false;
+              lastKnownLobby = currentLobby;
+              lastKnownUsername = document.getElementById('joinUsername').value.trim() ||
+                document.getElementById('username').value.trim();
+              
+              addMessage('System: You have been disconnected', true, 'error');
+              
+              // Show reconnect UI
+              document.getElementById('messageInput').style.display = 'none';
+              document.getElementById('sendBtn').style.display = 'none';
+              document.getElementById('reconnectContainer').style.display = 'block';
+            });
+            
+             // Add message for successful reconnection
+            socket.on('connect', () => {
+               if (!isConnected) {
+                 addMessage('System: Connection reestablished', true, 'system');
+               }
+               isConnected = true;
+            });
+        }
+        
+        setupSocketHandlers();
+        
+        // New reconnect handler
+        document.getElementById('reconnectBtn').addEventListener('click', () => {
+              if (!lastKnownLobby || !lastKnownUsername) return;
+              
+              addMessage('System: Attempting to reconnect...', true, 'system');
+              
+              // Create new socket connection
+              socket = io();
+              setupSocketHandlers();
+              
+              // Try to rejoin the lobby
+              socket.emit('join-lobby', {
+                code: lastKnownLobby,
+                username: lastKnownUsername
+              });
         });
 
         // Chat message sending

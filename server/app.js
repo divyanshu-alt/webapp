@@ -126,6 +126,36 @@ class Lobby {
     this.players.forEach((_, socketId) => this.removePlayer(socketId));
     lobbies.delete(this.code);
   }
+  
+   canReconnect(socketId) {
+     const player = this.players.get(socketId);
+     if (!player) return false;
+     
+     // Check if player was disconnected but lobby still exists
+     return Date.now() - player.lastActive < 600000 && // Within 10 minute window
+       Date.now() - this.createdAt < 60 * 60 * 1000; // Lobby not expired
+   }
+   
+   reconnectPlayer(socket, socketId) {
+     const player = this.players.get(socketId);
+     if (!player) return false;
+     
+     clearInterval(player.timeout);
+     player.timeout = setInterval(() => {
+       if (Date.now() - player.lastActive > 600000) {
+         this.removePlayer(socket.id, 'inactivity');
+       }
+     }, 30000);
+     
+     player.lastActive = Date.now();
+     this.players.set(socket.id, player);
+     socket.join(this.code);
+     
+     this.broadcastSystemMessage(`${player.username} reconnected`, 'reconnect');
+     this.broadcastPlayerList();
+     
+     return true;
+   }
 }
 
 const lobbies = new Map();
@@ -133,6 +163,28 @@ const lobbies = new Map();
 io.on('connection', (socket) => {
   let currentLobby = null;
   
+   socket.on('reconnect-attempt', ({ previousSocketId, code, username }) => {
+     const lobby = lobbies.get(code.toLowerCase());
+     if (!lobby) return socket.emit('error', 'Lobby no longer exists');
+     
+     if (lobby.canReconnect(previousSocketId)) {
+       if (lobby.reconnectPlayer(socket, previousSocketId)) {
+         socket.emit('reconnect-success', {
+           code: lobby.code,
+           createdAt: lobby.createdAt,
+           color: lobby.players.get(socket.id).color,
+           players: lobby.getPlayerList(),
+           messages: lobby.messages
+         });
+         return;
+       }
+     }
+     
+     // Fall back to normal join if reconnect not possible
+     socket.emit('error', 'Could not reconnect - joining as new player');
+     lobby.addPlayer(socket, username);
+   });
+   
   socket.on('create-lobby', (username) => {
     try {
       const code = generateSlug(2, { format: 'kebab' });
