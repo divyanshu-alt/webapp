@@ -110,10 +110,12 @@ class Lobby {
   }
   
   getPlayerList() {
-    return Array.from(this.players.values()).map(player => ({
+    const entries = Array.from(this.players.entries());
+    const hostId = entries[0]?.[0]; // First entry's key is host
+    return entries.map(([socketId, player]) => ({
       username: player.username,
       color: player.color,
-      isHost: this.players.keys().next().value === player.socketId
+      isHost: socketId === hostId
     }));
   }
   
@@ -157,7 +159,7 @@ class Lobby {
       }, 30000);
       
       socket.join(this.code);
-      this.broadcastSystemMessage(`${player.username} reconnected`, 'reconnect');
+      this.addSystemMessage(`${player.username} reconnected`, 'reconnect');
       this.broadcastPlayerList();
       
       return true;
@@ -178,6 +180,7 @@ io.on('connection', (socket) => {
       
       if (previousSocketId && lobby.canReconnect(previousSocketId)) {
         if (lobby.reconnectPlayer(socket, previousSocketId)) {
+          currentLobby = code.toLowerCase();
           socket.emit('reconnect-success', {
             code: lobby.code,
             createdAt: lobby.createdAt,

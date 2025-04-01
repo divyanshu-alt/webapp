@@ -771,6 +771,35 @@
               }
             }
           });
+          
+          socket.on('reconnect-success', (data) => {
+            isConnected = true;
+            isReconnecting = false;
+            currentLobby = data.code;
+            playerColor = data.color;
+            previousSocketId = socket.id;
+            
+            authContainer.style.display = 'none';
+            lobbyContainer.style.display = 'block';
+            
+            document.getElementById('messageInput').style.display = '';
+            document.getElementById('sendBtn').style.display = '';
+            document.getElementById('reconnectContainer').style.display = 'none';
+            
+            document.getElementById('lobbyCodeDisplay').textContent = data.code;
+            updateTimer(data.createdAt);
+            renderPlayers(data.players);
+            
+            addMessage('System: Successfully reconnected to lobby', true, 'success');
+            
+            data.messages.forEach(msg => {
+              if (msg.system) {
+                addMessage(msg.text, true, msg.type);
+              } else {
+                addMessage(msg);
+              }
+            });
+          });
         }
         
         // Initialize socket handlers
