@@ -8,7 +8,7 @@ from typing import Dict, Optional
 from googleapiclient.discovery import build
 from indic_transliteration import sanscript
 from indic_transliteration.sanscript import SchemeMap, SCHEMES, transliterate
-from youtubesearchpython import VideosSearch
+from youtubesearchpython import VideosSearch, CustomSearch, VideoDurationFilter
 
 
 def parse_args():
@@ -48,8 +48,43 @@ def normalize_text(text: str) -> str:
     return text.lower()
 
 
+def contains_foreign_script(text: str) -> bool:
+    """Check for non-English/Hindi characters after removing decorations"""
+    # First remove all decorative characters
+    decorations = r'[♤☆♥♦♣♠•●■►▼▲►▼◄►▼►►▼◄►▼►►▼◄►▼►►▼◄►▼►►▼◄►▼►►▼◄►▼》→←↑↓↔↕↨©®™°²³‰§¶¥¢£€]'
+    clean_text = re.sub(decorations, '', text)
+    
+    # Remove all punctuation/symbols except basic ones
+    clean_text = re.sub(r'[^\w\u0900-\u097F\s\-\|]', '', clean_text)
+    
+    # Check remaining text
+    foreign_pattern = re.compile(r'[^\u0000-\u00FF\u0900-\u097F]')
+    return bool(foreign_pattern.search(clean_text))
+
+def title_similarity(a: str, b: str) -> float:
+    """Calculate similarity with better decorative character handling"""
+    # Apply penalty only if core text contains foreign scripts
+    core_text = re.sub(r'[^\w\u0900-\u097F\s]', '', b)  # Remove all non-word chars
+    foreign_penalty = 0.7 if contains_foreign_script(core_text) else 1.0
+    
+    a_norm = normalize_text(a)
+    b_norm = normalize_text(b)
+    
+    seq_match = SequenceMatcher(None, a_norm, b_norm).ratio()
+    a_words = set(a_norm.split())
+    b_words = set(b_norm.split())
+    word_overlap = len(a_words & b_words) / max(len(a_words), 1)
+    
+    base_score = (seq_match * 0.7) + (word_overlap * 0.3)
+    return base_score * foreign_penalty
+
+
+
 def title_similarity(a: str, b: str) -> float:
     """Calculate similarity score with transliteration support"""
+    core_text = re.sub(r'[^\w\u0900-\u097F\s]', '', b)  # Remove all non-word chars
+    foreign_penalty = 0.5 if contains_foreign_script(core_text) else 1.0
+
     a_norm = normalize_text(a)
     b_norm = normalize_text(b)
     
@@ -61,7 +96,7 @@ def title_similarity(a: str, b: str) -> float:
     b_words = set(b_norm.split())
     word_overlap = len(a_words & b_words) / max(len(a_words), 1)
     
-    return (seq_match * 0.7) + (word_overlap * 0.3)
+    return ((seq_match * 0.7) + (word_overlap * 0.3)) * foreign_penalty
 
 
 def get_best_thumbnail(thumbnails: dict) -> str:
@@ -94,7 +129,7 @@ def parse_duration(duration_str: str) -> int:
 
 def search_youtube_api(movie_name: str, year: str, api_key: str) -> Optional[Dict]:
     youtube = build('youtube', 'v3', developerKey=api_key)
-    base_query = f"{movie_name} {clean_year(year)} full movie -songs -lyrics -album"
+    base_query = f"{movie_name} {clean_year(year)} full movie -songs -lyrics -album -scene"
     print(f"\n[DEBUG] API Search Query: {base_query}")
     
     try:
@@ -143,7 +178,9 @@ def search_youtube_api(movie_name: str, year: str, api_key: str) -> Optional[Dic
                 'title': video_title,
                 'link': f"https://www.youtube.com/watch?v={video['id']}",
                 'duration': duration_sec,
-                'thumbnail': get_best_thumbnail(video['snippet']['thumbnails'])
+                'thumbnail': get_best_thumbnail(video['snippet']['thumbnails']),
+                'channel': 'tofill',
+                'views': 404
             }
 
     return best_video
@@ -153,7 +190,7 @@ def search_youtube_noapi(movie_name: str, year: str) -> Optional[Dict]:
     print(f"\n[DEBUG] Non-API Search Query: {base_query}")
     
     try:
-        videos_search = VideosSearch(base_query, limit=10)
+        videos_search = CustomSearch(base_query, VideoDurationFilter.long, limit=10)
         results = videos_search.result()['result']
     except Exception as e:
         print(f"Search Error: {e}")
@@ -171,17 +208,20 @@ def search_youtube_noapi(movie_name: str, year: str) -> Optional[Dict]:
         duration_score = min(duration_sec / 7200, 1.0)
         total_score = (similarity_score * 0.8) + (duration_score * 0.2)
         
-        print(f"\n[DEBUG] Video: {video_title}")
+        print(f"\n[DEBUG] Original: {movie_name} | Video: {video_title}")
+        print(f"        Normalized: {normalize_text(movie_name)} vs {normalize_text(video_title)}") 
         print(f"        Similarity: {similarity_score:.2f} | Duration: {format_duration(duration_sec)}")
         print(f"        Total Score: {total_score:.2f}")
 
-        if total_score > best_score and similarity_score > 0.2:
+        if total_score > best_score:
             best_score = total_score
             best_video = {
                 'title': video_title,
                 'link': video['link'],
                 'duration': duration_sec,
-                'thumbnail': video['thumbnails'][-1]['url'] if video['thumbnails'] else ''
+                'thumbnail': video['thumbnails'][-1]['url'] if video['thumbnails'] else '',
+                'channel': video['channel']['name'] if video['channel'] else '',
+                'views': video['viewCount']['text']
             }
 
     return best_video
@@ -195,7 +235,9 @@ def process_csv(args):
             'YouTube Link', 
             'Video Title',
             'Duration (HH:MM:SS)', 
-            'Thumbnail'
+            'Thumbnail',
+            'Channel',
+            'Views'
         ]
 
         # Batch processing
@@ -223,15 +265,18 @@ def process_csv(args):
                 row['Video Title'] = video_info['title']
                 row['Duration (HH:MM:SS)'] = format_duration(video_info['duration'])
                 row['Thumbnail'] = video_info['thumbnail']
+                row['Channel'] = video_info['channel']
+                row['Views'] = video_info['views']
                 print(f"\n✅ Found: {video_info['title']}")
                 print(f"   Link: {video_info['link']}")
+                print(f"   Duration: {video_info['duration']}")
                 print(f"   Thumbnail: {video_info['thumbnail']}")
             else:
-                for field in ['YouTube Link', 'Video Title', 'Duration (HH:MM:SS)', 'Thumbnail']:
+                for field in ['YouTube Link', 'Video Title', 'Duration (HH:MM:SS)', 'Thumbnail', 'Channel', 'Views']:
                     row[field] = ''
                 print("❌ No suitable video found")
 
-            time.sleep(2)
+            time.sleep(5)
 
         with open(args.output_csv, 'w', newline='', encoding='utf-8') as outfile:
             writer = csv.DictWriter(outfile, fieldnames=fieldnames)
