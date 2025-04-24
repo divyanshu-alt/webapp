@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BollyVault - Vintage Hindi Cinema Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e50914;
+            --background: #141414;
+            --text: #fff;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding-top: 80px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Impact', sans-serif;
+            font-size: 2.5em;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.2em;
+        }
+
+        .search-bar {
+            padding: 20px;
+            background: rgba(0,0,0,0.95);
+            position: sticky;
+            top: 60px;
+            z-index: 999;
+            transition: all 0.3s;
+        }
+
+        .category {
+            margin: 40px 20px;
+        }
+
+        .category h2 {
+            margin: 0 0 15px 10px;
+            font-size: 1.4em;
+        }
+
+        .movie-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px;
+            scrollbar-width: none;
+        }
+
+        .movie-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .movie-tile {
+            min-width: 240px;
+            height: 135px;
+            background: #000;
+            border-radius: 4px;
+            transition: transform 0.3s, z-index 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .movie-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .movie-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 90%);
+            pointer-events: none;
+        }
+
+        .movie-title {
+            font-weight: bold;
+            margin: 0;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-year {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        @media (min-width: 768px) {
+            .movie-tile {
+                min-width: 320px;
+                height: 180px;
+            }
+
+            .movie-tile:hover {
+                transform: scale(1.15);
+                z-index: 1000;
+            }
+
+            .movie-info {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">
+            <i class="fas fa-film"></i>
+            BOLLYVAULT
+        </a>
+    </header>
+    
+    <div class="search-bar">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search 10,000+ Vintage Movies...">
+        </div>
+    </div>
+    
+    <div id="categories"></div>
+    <div id="searchResults" class="category" style="display: none;">
+        <h2>Search Results</h2>
+        <div class="movie-row" id="resultsContainer"></div>
+    </div>
+
+    <script>
+        let movies = [];
+        
+        async function loadMovies() {
+            const response = await fetch('bollyvault.json');
+            movies = await response.json();
+            generateCategories();
+        }
+
+        function generateCategories() {
+            const categories = [
+                { 
+                    name: "Top Rated", 
+                    filter: m => m['Rating(10)'] > 7, 
+                    sort: (a,b) => b['Rating(10)'] - a['Rating(10)'] 
+                },
+                { 
+                    name: "Most Watched", 
+                    sort: (a,b) => b.Views - a.Views 
+                },
+                { 
+                    name: "Golden Era (70s-80s)", 
+                    filter: m => m.Year >= 1970 && m.Year < 1990 
+                },
+                { 
+                    name: "Long Plays", 
+                    filter: m => m.Duration > 7200 
+                }
+            ];
+
+            categories.forEach(cat => {
+                const filtered = movies.filter(cat.filter || (() => true))
+                    .sort(cat.sort || (() => 0))
+                    .slice(0, 20);
+                
+                if(filtered.length) createCategory(cat.name, filtered);
+            });
+        }
+
+
+
+function createCategory(name, movies) {
+    const categoryHTML = `
+        <div class="category">
+            <h2>${name}</h2>
+            <div class="movie-row">
+                ${movies.map(m => {
+                    // Handle missing thumbnail
+                    const thumbnailUrl = m.Thumbnail 
+                        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+                        : 'https://via.placeholder.com/320x180/333/666?text=No+Thumbnail';
+                    
+                    return `
+                    <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                        <img src="${thumbnailUrl}" 
+                             class="movie-thumbnail"
+                             loading="lazy">
+                        <div class="movie-info">
+                            <p class="movie-title">${m['Movie Name']}</p>
+                            <p class="movie-year">${m.Year}</p>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+    document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
+}
+
+
+        // Fixed search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if(!term) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            const results = movies.filter(m => 
+                m['Movie Name'].toLowerCase().includes(term) || 
+                (m.Genre && m.Genre.some(g => g.toLowerCase().includes(term)))).slice(0,50);
+
+            resultsContainer.style.display = 'block';
+            document.getElementById('resultsContainer').innerHTML = results.map(m => `
+                <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                    <img src="${m.Thumbnail}" 
+                         class="movie-thumbnail"
+                         loading="lazy">
+                    <div class="movie-info">
+                        <p class="movie-title">${m['Movie Name']}</p>
+                        <p class="movie-year">${m.Year}</p>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        loadMovies();
+    </script>
+</body>
+</html>

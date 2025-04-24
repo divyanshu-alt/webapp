@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BollyVault - Vintage Hindi Cinema Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e50914;
+            --background: #141414;
+            --text: #fff;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding-top: 140px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo {
+            font-family: 'Impact', sans-serif;
+            font-size: 2.5em;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-bar {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px 20px;
+            background: #333;
+            border: 2px solid #444;
+            color: white;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #222;
+        }
+
+        .view-all-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sort-select {
+            padding: 10px 15px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 20px;
+        }
+
+   	.category {
+            margin: 40px 20px;
+        }
+        .category h2 {
+            margin: 0 0 15px 10px;
+            font-size: 1.4em;
+        }
+        .movie-row {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px;
+            scrollbar-width: none;
+        }
+        .movie-row::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Keep previous movie-tile styles, add: */
+        .movie-tile {
+            aspect-ratio: 16/9;
+        }
+
+   	.movie-tile {
+            min-width: 240px;
+            height: 135px;
+            background: #000;
+            border-radius: 4px;
+            transition: transform 0.3s, z-index 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .movie-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .movie-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 90%);
+            pointer-events: none;
+        }
+
+        .movie-title {
+            font-weight: bold;
+            margin: 0;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-year {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        @media (min-width: 768px) {
+            .movie-tile {
+                min-width: 320px;
+                height: 180px;
+            }
+            .movie-tile:hover {
+                transform: scale(1.15);
+                z-index: 1000;
+            }
+            .movie-info {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { padding-top: 160px; }
+            .nav-container { flex-direction: column; gap: 15px; }
+            .logo { font-size: 2em; }
+            .movie-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Add loading animation */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-film"></i>
+                BOLLYVAULT
+            </a>
+            <div class="controls">
+                <select class="sort-select" id="sortSelect">
+                    <option value="name">Sort by Name</option>
+                    <option value="year">Sort by Year</option>
+                    <option value="views">Sort by Views</option>
+                </select>
+            </div>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search 10,000+ Vintage Movies...">
+        </div>
+    </header>
+    
+    <div id="searchResults" class="category" style="display: none;">
+        <h2>Search Results</h2>
+        <div class="movie-row" id="resultsContainer"></div>
+    </div>
+
+    <div id="categories"></div>
+
+    <div id="viewAllSection" style="display: none;">
+        <div class="view-all-header">
+            <h2>All Movies</h2>
+            <div class="controls">
+                <select class="sort-select" id="viewAllSort">
+                    <option value="name">A-Z</option>
+                    <option value="-name">Z-A</option>
+                    <option value="-year">Newest First</option>
+                    <option value="year">Oldest First</option>
+                    <option value="-views">Most Popular</option>
+                </select>
+            </div>
+        </div>
+        <div class="movie-grid" id="viewAllGrid"></div>
+        <div id="loader" class="loader" style="display: none;"></div>
+    </div>
+
+    <script>
+        let movies = [];
+        let allMoviesPage = 1;
+        const pageSize = 50;
+        let currentSort = 'name';
+        let observer;
+
+        async function loadMovies() {
+            const response = await fetch('bollyvault.json');
+            movies = await response.json();
+            generateCategories();
+            initViewAll();
+            setupInfiniteScroll();
+        }
+
+        function generateCategories() {
+            const categories = [
+                { 
+                    name: "Staff Picks", 
+                    filter: m => m['Rating(10)'] > 7,
+                    sort: (a,b) => b['Rating(10)'] - a['Rating(10)'],
+                    randomize: true
+                },
+                { 
+                    name: "Golden Era (70s-80s)", 
+                    filter: m => m.Year >= 1970 && m.Year < 1990,
+                    randomize: true
+                },
+                { 
+                    name: "Recently Added", 
+                    sort: (a,b) => b.Year - a.Year 
+                }
+            ];
+
+            categories.forEach(cat => {
+                let filtered = movies.filter(cat.filter || (() => true))
+                                .sort(cat.sort || (() => 0));
+                
+                if(cat.randomize) filtered = shuffleArray(filtered);
+                
+                createCategory(cat.name, filtered.slice(0, 20));
+            });
+        }
+
+function createCategory(name, movies) {
+    const categoryHTML = `
+        <div class="category">
+            <h2>${name}</h2>
+            <div class="movie-row">
+                ${movies.map(m => {
+                    // Handle missing thumbnail
+                    const thumbnailUrl = m.Thumbnail
+                        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+                        : 'https://via.placeholder.com/320x180/333/666?text=No+Thumbnail';
+                    return `
+                    <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                        <img src="${thumbnailUrl}"
+                             class="movie-thumbnail"
+                             loading="lazy">
+                        <div class="movie-info">
+                            <p class="movie-title">${m['Movie Name']}</p>
+                            <p class="movie-year">${m.Year}</p>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+    document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
+}
+
+        function initViewAll() {
+            document.getElementById('viewAllSection').style.display = 'block';
+            renderViewAll();
+        }
+
+        function renderViewAll(page=1) {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const sorted = sortMovies(movies, currentSort);
+            const pagedMovies = sorted.slice(start, end);
+            
+            const grid = document.getElementById('viewAllGrid');
+            grid.innerHTML += pagedMovies.map(m => createMovieTile(m)).join('');
+            
+            // Reset observer
+            if(observer) observer.disconnect();
+            setupInfiniteScroll();
+        }
+
+        function sortMovies(movies, sortKey) {
+            return [...movies].sort((a,b) => {
+                if(sortKey === 'name') return a['Movie Name'].localeCompare(b['Movie Name']);
+                if(sortKey === '-name') return b['Movie Name'].localeCompare(a['Movie Name']);
+                if(sortKey === 'year') return a.Year - b.Year;
+                if(sortKey === '-year') return b.Year - a.Year;
+                if(sortKey === '-views') return b.Views - a.Views;
+                return 0;
+            });
+        }
+
+        function setupInfiniteScroll() {
+            const loader = document.getElementById('loader');
+            observer = new IntersectionObserver((entries) => {
+                if(entries[0].isIntersecting) {
+                    allMoviesPage++;
+                    loader.style.display = 'block';
+                    setTimeout(() => {
+                        renderViewAll(allMoviesPage);
+                        loader.style.display = 'none';
+                    }, 500);
+                }
+            }, { threshold: 1.0 });
+
+            observer.observe(loader);
+        }
+
+        // Utility functions
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function createMovieTile(m) {
+            const thumbnailUrl = m.Thumbnail 
+                ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+                : 'https://via.placeholder.com/320x180/333/666?text=No+Thumbnail';
+
+            return `
+                <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                    <img src="${thumbnailUrl}" 
+                         class="movie-thumbnail"
+                         loading="lazy">
+                    <div class="movie-info">
+                        <p class="movie-title">${m['Movie Name']}</p>
+                        <p class="movie-year">${m.Year}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Search functionality with debounce
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const term = e.target.value.toLowerCase().trim();
+                const resultsContainer = document.getElementById('searchResults');
+                
+                if(!term) {
+                    resultsContainer.style.display = 'none';
+                    return;
+                }
+
+                const results = movies.filter(m => 
+                    m['Movie Name'].toLowerCase().includes(term) || 
+                    (m.Genre && m.Genre.some(g => g.toLowerCase().includes(term))))
+                    .slice(0, 50);
+
+                resultsContainer.style.display = 'block';
+                document.getElementById('resultsContainer').innerHTML = results.map(createMovieTile).join('');
+            }, 300);
+        });
+
+        // Sorting control
+        document.getElementById('viewAllSort').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            document.getElementById('viewAllGrid').innerHTML = '';
+            allMoviesPage = 1;
+            renderViewAll();
+        });
+
+        loadMovies();
+    </script>
+</body>
+</html>
+
