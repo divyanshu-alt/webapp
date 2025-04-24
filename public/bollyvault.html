@@ -17,143 +17,445 @@
             color: var(--text);
             font-family: 'Arial', sans-serif;
             margin: 0;
+            padding-top: 140px;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .logo {
+            font-family: 'Impact', sans-serif;
+            font-size: 2.5em;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
 
         .search-bar {
-            padding: 20px;
-            background: rgba(0,0,0,0.95);
-            position: fixed;
             width: 100%;
-            z-index: 100;
-        }
-
-        .search-container {
             max-width: 1200px;
             margin: 0 auto;
         }
 
         #searchInput {
             width: 100%;
-            padding: 15px;
+            padding: 15px 20px;
             background: #333;
-            border: none;
+            border: 2px solid #444;
             color: white;
-            border-radius: 4px;
-            font-size: 1.2em;
+            border-radius: 30px;
+            font-size: 1.1em;
+            transition: all 0.3s;
         }
 
-        .category {
-            margin: 100px 20px 40px;
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #222;
         }
 
+        .view-all-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sort-select {
+            padding: 10px 15px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 20px;
+        }
+
+   	.category {
+            margin: 40px 20px;
+        }
         .category h2 {
             margin: 0 0 15px 10px;
+            font-size: 1.4em;
         }
-
         .movie-row {
             display: flex;
             overflow-x: auto;
             gap: 15px;
             padding: 10px;
+            scrollbar-width: none;
+        }
+        .movie-row::-webkit-scrollbar {
+            display: none;
         }
 
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Keep previous movie-tile styles, add: */
         .movie-tile {
-            min-width: 200px;
-            height: 300px;
-            background-size: cover;
+            aspect-ratio: 16/9;
+        }
+
+   	.movie-tile {
+            min-width: 240px;
+            height: 135px;
+            background: #000;
             border-radius: 4px;
-            transition: transform 0.3s;
+            transition: transform 0.3s, z-index 0.3s;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .movie-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .movie-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.9) 90%);
+            pointer-events: none;
         }
 
-        .movie-tile:hover {
-            transform: scale(1.05);
-            z-index: 10;
+        .movie-title {
+            font-weight: bold;
+            margin: 0;
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-year {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        @media (min-width: 768px) {
+            .movie-tile {
+                min-width: 320px;
+                height: 180px;
+            }
+            .movie-tile:hover {
+                transform: scale(1.15);
+                z-index: 1000;
+            }
+            .movie-info {
+                padding: 15px;
+            }
         }
 
         @media (max-width: 768px) {
-            .movie-tile { min-width: 150px; height: 225px; }
+            body { padding-top: 160px; }
+            .nav-container { flex-direction: column; gap: 15px; }
+            .logo { font-size: 2em; }
+            .movie-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Add loading animation */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="search-bar">
-        <div class="search-container">
+    <header class="header">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-film"></i>
+                BOLLYVAULT
+            </a>
+            <div class="controls">
+                <select class="sort-select" id="sortSelect">
+                    <option value="name">Sort by Name</option>
+                    <option value="year">Sort by Year</option>
+                    <option value="views">Sort by Views</option>
+                </select>
+            </div>
+        </div>
+        <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Search 10,000+ Vintage Movies...">
         </div>
-    </div>
+    </header>
     
-    <div id="categories"></div>
     <div id="searchResults" class="category" style="display: none;">
         <h2>Search Results</h2>
         <div class="movie-row" id="resultsContainer"></div>
     </div>
 
+    <div id="categories"></div>
+
+    <div id="viewAllSection" style="display: none;">
+        <div class="view-all-header">
+            <h2>All Movies</h2>
+            <div class="controls">
+                <select class="sort-select" id="viewAllSort">
+                    <option value="name">A-Z</option>
+                    <option value="-name">Z-A</option>
+                    <option value="-year">Newest First</option>
+                    <option value="year">Oldest First</option>
+                    <option value="-views">Most Popular</option>
+                </select>
+            </div>
+        </div>
+        <div class="movie-grid" id="viewAllGrid"></div>
+        <div id="loader" class="loader" style="display: none;"></div>
+    </div>
+
     <script>
         let movies = [];
-        
+        let allMoviesPage = 1;
+        const pageSize = 50;
+        let currentSort = 'name';
+        let observer;
+	let isLoading = false;
+
         async function loadMovies() {
             const response = await fetch('bollyvault.json');
             movies = await response.json();
             generateCategories();
+            initViewAll();
+            setupInfiniteScroll();
         }
 
         function generateCategories() {
             const categories = [
-                { name: "Top Rated", filter: m => m['Rating(10)'] > 7, sort: (a,b) => b['Rating(10)'] - a['Rating(10)'] },
-                { name: "Most Watched", sort: (a,b) => b.Views - a.Views },
-                { name: "90s Classics", filter: m => m.Year >= 1990 && m.Year < 2000 },
-                { name: "Long Movies", filter: m => m.Duration > 7200 }, // >2hrs
-                { name: "Recent Additions", sort: (a,b) => b.Year - a.Year }
+                { 
+                    name: "Staff Picks", 
+                    filter: m => m['Rating(10)'] > 7,
+                    sort: (a,b) => b['Rating(10)'] - a['Rating(10)'],
+                    randomize: true
+                },
+                { 
+                    name: "Golden Era (70s-80s)", 
+                    filter: m => m.Year >= 1970 && m.Year < 1990,
+                    randomize: true
+                },
+                { 
+                    name: "Recently Added", 
+                    sort: (a,b) => b.Year - a.Year 
+                }
             ];
 
             categories.forEach(cat => {
-                const filtered = movies.filter(cat.filter || (() => true))
-                    .sort(cat.sort || (() => 0))
-                    .slice(0, 20);
+                let filtered = movies.filter(cat.filter || (() => true))
+                                .sort(cat.sort || (() => 0));
                 
-                if(filtered.length) createCategory(cat.name, filtered);
+                if(cat.randomize) filtered = shuffleArray(filtered);
+                
+                createCategory(cat.name, filtered.slice(0, 20));
             });
         }
 
-        function createCategory(name, movies) {
-            const categoryHTML = `
-                <div class="category">
-                    <h2>${name}</h2>
-                    <div class="movie-row">
-                        ${movies.map(m => `
-                            <div class="movie-tile" 
-                                 style="background-image: url('${m.Thumbnail}')"
-                                 onclick="window.open('${m['YouTube Link']}', '_blank')"
-                                 title="${m['Movie Name']} (${m.Year})">
-                            </div>
-                        `).join('')}
+function createCategory(name, movies) {
+    const categoryHTML = `
+        <div class="category">
+            <h2>${name}</h2>
+            <div class="movie-row">
+                ${movies.map(m => {
+                    // Handle missing thumbnail
+                    const thumbnailUrl = m.Thumbnail
+                        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+                        : 'https://pngimg.com/uploads/square/square_PNG95.png';
+                    return `
+                    <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                        <img src="${thumbnailUrl}"
+                             class="movie-thumbnail"
+                             loading="lazy">
+                        <div class="movie-info">
+                            <p class="movie-title">${m['Movie Name']}</p>
+                            <p class="movie-year">${m.Year}</p>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+    document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
+}
+
+        function initViewAll() {
+            document.getElementById('viewAllSection').style.display = 'block';
+            renderViewAll();
+        }
+
+        async function renderViewAll(page=1) {
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const sorted = sortMovies(movies, currentSort);
+            const pagedMovies = sorted.slice(start, end);
+            
+            const grid = document.getElementById('viewAllGrid');
+	    const fragment = document.createDocumentFragment();
+
+	     pagedMovies.forEach(m => {
+		  const tile = createMovieTileElement(m);
+		  fragment.appendChild(tile);
+	     });
+		    
+	     grid.appendChild(fragment);
+        }
+
+        function sortMovies(movies, sortKey) {
+            return [...movies].sort((a,b) => {
+                if(sortKey === 'name') return a['Movie Name'].localeCompare(b['Movie Name']);
+                if(sortKey === '-name') return b['Movie Name'].localeCompare(a['Movie Name']);
+                if(sortKey === 'year') return a.Year - b.Year;
+                if(sortKey === '-year') return b.Year - a.Year;
+                if(sortKey === '-views') return b.Views - a.Views;
+                return 0;
+            });
+        }
+
+
+function setupInfiniteScroll() {
+    const sentinel = document.createElement('div');
+    sentinel.id = 'scroll-sentinel';
+    document.getElementById('viewAllGrid').after(sentinel);
+
+    observer = new IntersectionObserver(async ([entry]) => {
+        if (entry.isIntersecting && !isLoading && 
+            allMoviesPage * pageSize < movies.length) {
+            isLoading = true;
+            document.getElementById('loader').style.display = 'block';
+            
+            allMoviesPage++;
+            await renderViewAll(allMoviesPage);
+            
+            isLoading = false;
+            document.getElementById('loader').style.display = 'none';
+        }
+    }, { threshold: 0.5 });
+
+    observer.observe(sentinel);
+}
+
+        // Utility functions
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+function createMovieTileElement(m) {
+    const tile = document.createElement('div');
+    tile.className = 'movie-tile';
+    tile.onclick = () => window.open(m['YouTube Link'], '_blank');
+    
+    const thumbnailUrl = m.Thumbnail 
+        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+        : 'https://pngimg.com/uploads/square/square_PNG95.png';
+
+    tile.innerHTML = `
+        <img src="${thumbnailUrl}" 
+             class="movie-thumbnail"
+             loading="lazy">
+        <div class="movie-info">
+            <p class="movie-title">${m['Movie Name']}</p>
+            <p class="movie-year">${m.Year}</p>
+        </div>
+    `;
+    
+    return tile;
+}
+
+   function createMovieTile(m) {
+            const thumbnailUrl = m.Thumbnail
+                ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
+                : 'https://pngimg.com/uploads/square/square_PNG95.png';
+            return `
+                <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
+                    <img src="${thumbnailUrl}"
+                         class="movie-thumbnail"
+                         loading="lazy">
+                    <div class="movie-info">
+                        <p class="movie-title">${m['Movie Name']}</p>
+                        <p class="movie-year">${m.Year}</p>
                     </div>
                 </div>
             `;
-            document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
         }
 
-        // Search functionality
+        // Search functionality with debounce
+        let searchTimeout;
         document.getElementById('searchInput').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            const results = movies.filter(m => 
-                m['Movie Name'].toLowerCase().includes(term) || 
-                m.Genre.some(g => g.toLowerCase().includes(term)).slice(0, 50));
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const term = e.target.value.toLowerCase().trim();
+                const resultsContainer = document.getElementById('searchResults');
+                
+                if(!term) {
+                    resultsContainer.style.display = 'none';
+                    return;
+                }
 
-            document.getElementById('searchResults').style.display = term ? 'block' : 'none';
-            document.getElementById('resultsContainer').innerHTML = results.map(m => `
-                <div class="movie-tile" 
-                     style="background-image: url('${m.Thumbnail}')"
-                     onclick="window.open('${m['YouTube Link']}', '_blank')">
-                </div>
-            `).join('');
+                const results = movies.filter(m => 
+                    m['Movie Name'].toLowerCase().includes(term) || 
+                    (m.Genre && m.Genre.some(g => g.toLowerCase().includes(term))))
+                    .slice(0, 50);
+
+                resultsContainer.style.display = 'block';
+                document.getElementById('resultsContainer').innerHTML = results.map(createMovieTile).join('');
+            }, 300);
+        });
+
+        // Sorting control
+        document.getElementById('viewAllSort').addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            document.getElementById('viewAllGrid').innerHTML = '';
+            allMoviesPage = 1;
+            renderViewAll();
         });
 
         loadMovies();
     </script>
 </body>
 </html>
-
 
