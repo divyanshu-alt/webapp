@@ -81,24 +81,6 @@ def contains_foreign_script(text: str) -> bool:
     foreign_pattern = re.compile(r'[^\u0000-\u00FF\u0900-\u097F]')
     return bool(foreign_pattern.search(clean_text))
 
-def title_similarity(a: str, b: str) -> float:
-    """Calculate similarity with better decorative character handling"""
-    # Apply penalty only if core text contains foreign scripts
-    core_text = re.sub(r'[^\w\u0900-\u097F\s]', '', b)  # Remove all non-word chars
-    foreign_penalty = 0.7 if contains_foreign_script(core_text) else 1.0
-    
-    a_norm = normalize_text(a)
-    b_norm = normalize_text(b)
-    
-    seq_match = SequenceMatcher(None, a_norm, b_norm).ratio()
-    a_words = set(a_norm.split())
-    b_words = set(b_norm.split())
-    word_overlap = len(a_words & b_words) / max(len(a_words), 1)
-    
-    base_score = (seq_match * 0.7) + (word_overlap * 0.3)
-    return base_score * foreign_penalty
-
-
 
 def title_similarity(a: str, b: str) -> float:
     """Calculate similarity score with transliteration support"""
@@ -290,16 +272,6 @@ def process_csv(args):
                     video_info = search_youtube_noapi(row['Movie Name'], row['Year'])
             except Exception as e:
                 print(f"Processing Error: {e}")
-
-            output_row = {
-                **row,
-                'YouTube Link': video_info.get('link', '') if video_info else '',
-                'Video Title': video_info.get('title', '') if video_info else '',
-                'Duration (HH:MM:SS)': format_duration(video_info.get('duration', 0)) if video_info else '',
-                'Thumbnail': video_info.get('thumbnail', '') if video_info else '',
-                'Channel': video_info.get('channel', '') if video_info else '',
-                'Views': video_info.get('views', '') if video_info else ''
-            }
 
             output_row = None
             if video_info:
