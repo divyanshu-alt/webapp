@@ -97,7 +97,7 @@
             border-radius: 20px;
         }
 
-   	.category {
+        .category {
             margin: 40px 20px;
         }
         .category h2 {
@@ -115,7 +115,6 @@
             display: none;
         }
 
-
         .movie-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -123,14 +122,9 @@
             padding: 20px;
         }
 
-        /* Keep previous movie-tile styles, add: */
         .movie-tile {
-            aspect-ratio: 16/9;
-        }
-
-   	.movie-tile {
-            min-width: 240px;
-            height: 135px;
+            min-width: 150px;
+            height: 225px;
             background: #000;
             border-radius: 4px;
             transition: transform 0.3s, z-index 0.3s;
@@ -168,18 +162,111 @@
             opacity: 0.8;
         }
 
-        @media (min-width: 768px) {
-            .movie-tile {
-                min-width: 320px;
-                height: 180px;
-            }
-            .movie-tile:hover {
-                transform: scale(1.15);
-                z-index: 1000;
-            }
-            .movie-info {
-                padding: 15px;
-            }
+        /* Movie Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--background);
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 8px;
+            padding: 25px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .modal-main {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+        }
+
+        .modal-poster {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .modal-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-title {
+            font-size: 2em;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-meta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-rating {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-stars {
+            color: gold;
+        }
+
+        .modal-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-link {
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-section {
+            margin-top: 15px;
+        }
+
+        .modal-section h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .watch-button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         @media (max-width: 768px) {
@@ -187,9 +274,12 @@
             .nav-container { flex-direction: column; gap: 15px; }
             .logo { font-size: 2em; }
             .movie-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal-main { grid-template-columns: 1fr; }
+            .modal-content { margin: 10px; }
+            .modal-title { font-size: 1.5em; }
         }
 
-        /* Add loading animation */
+        /* Loading animation */
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary);
@@ -222,7 +312,7 @@
             </div>
         </div>
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search 10,000+ Vintage Movies...">
+            <input type="text" id="searchInput" placeholder="Search Vintage Movies...">
         </div>
     </header>
     
@@ -238,11 +328,11 @@
             <h2>All Movies</h2>
             <div class="controls">
                 <select class="sort-select" id="viewAllSort">
-                    <option value="name">A-Z</option>
-                    <option value="-name">Z-A</option>
-                    <option value="-year">Newest First</option>
-                    <option value="year">Oldest First</option>
-                    <option value="-views">Most Popular</option>
+                    <option value="title">A-Z</option>
+                    <option value="-title">Z-A</option>
+                    <option value="-year_of_release">Newest First</option>
+                    <option value="year_of_release">Oldest First</option>
+                    <option value="-imdb_rating">Top Rated</option>
                 </select>
             </div>
         </div>
@@ -250,13 +340,21 @@
         <div id="loader" class="loader" style="display: none;"></div>
     </div>
 
+    <!-- Movie Detail Modal -->
+    <div class="modal-overlay" id="movieModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-main" id="modalContent"></div>
+        </div>
+    </div>
+
     <script>
         let movies = [];
         let allMoviesPage = 1;
         const pageSize = 50;
-        let currentSort = 'name';
+        let currentSort = 'title';
         let observer;
-	let isLoading = false;
+        let isLoading = false;
 
         async function loadMovies() {
             const response = await fetch('bollyvault.json');
@@ -270,18 +368,21 @@
             const categories = [
                 { 
                     name: "Staff Picks", 
-                    filter: m => m['Rating(10)'] > 7,
-                    sort: (a,b) => b['Rating(10)'] - a['Rating(10)'],
+                    filter: m => m.imdb_rating > 7,
+                    sort: (a,b) => b.imdb_rating - a.imdb_rating,
                     randomize: true
                 },
                 { 
-                    name: "Golden Era (70s-80s)", 
-                    filter: m => m.Year >= 1970 && m.Year < 1990,
-                    randomize: true
+                    name: "Classic Era", 
+                    filter: m => m.movie_era === 'Classic'
                 },
                 { 
-                    name: "Recently Added", 
-                    sort: (a,b) => b.Year - a.Year 
+                    name: "Golden Era", 
+                    filter: m => m.movie_era === 'Golden'
+                },
+                { 
+                    name: "Modern Era", 
+                    filter: m => m.movie_era === 'Modern'
                 }
             ];
 
@@ -295,33 +396,27 @@
             });
         }
 
-function createCategory(name, movies) {
-    const categoryHTML = `
-        <div class="category">
-            <h2>${name}</h2>
-            <div class="movie-row">
-                ${movies.map(m => {
-                    // Handle missing thumbnail
-                    const thumbnailUrl = m.Thumbnail
-                        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
-                        : 'https://pngimg.com/uploads/square/square_PNG95.png';
-                    return `
-                    <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
-                        <img src="${thumbnailUrl}"
-                             class="movie-thumbnail"
-                             loading="lazy">
-                        <div class="movie-info">
-                            <p class="movie-title">${m['Movie Name']}</p>
-                            <p class="movie-year">${m.Year}</p>
-                        </div>
+        function createCategory(name, movies) {
+            const categoryHTML = `
+                <div class="category">
+                    <h2>${name}</h2>
+                    <div class="movie-row">
+                        ${movies.map(m => `
+                            <div class="movie-tile" onclick="showMovieDetail('${m.imdb_id}')">
+                                <img src="${m.poster_path}"
+                                     class="movie-thumbnail"
+                                     loading="lazy">
+                                <div class="movie-info">
+                                    <p class="movie-title">${m.title}</p>
+                                    <p class="movie-year">${m.year_of_release}</p>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>
-    `;
-    document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
-}
+                </div>
+            `;
+            document.getElementById('categories').insertAdjacentHTML('beforeend', categoryHTML);
+        }
 
         function initViewAll() {
             document.getElementById('viewAllSection').style.display = 'block';
@@ -335,92 +430,134 @@ function createCategory(name, movies) {
             const pagedMovies = sorted.slice(start, end);
             
             const grid = document.getElementById('viewAllGrid');
-	    const fragment = document.createDocumentFragment();
+            const fragment = document.createDocumentFragment();
 
-	     pagedMovies.forEach(m => {
-		  const tile = createMovieTileElement(m);
-		  fragment.appendChild(tile);
-	     });
-		    
-	     grid.appendChild(fragment);
+            pagedMovies.forEach(m => {
+                const tile = createMovieTileElement(m);
+                fragment.appendChild(tile);
+            });
+            
+            grid.appendChild(fragment);
         }
 
         function sortMovies(movies, sortKey) {
             return [...movies].sort((a,b) => {
-                if(sortKey === 'name') return a['Movie Name'].localeCompare(b['Movie Name']);
-                if(sortKey === '-name') return b['Movie Name'].localeCompare(a['Movie Name']);
-                if(sortKey === 'year') return a.Year - b.Year;
-                if(sortKey === '-year') return b.Year - a.Year;
-                if(sortKey === '-views') return b.Views - a.Views;
+                if(sortKey === 'title') return a.title.localeCompare(b.title);
+                if(sortKey === '-title') return b.title.localeCompare(a.title);
+                if(sortKey === 'year_of_release') return a.year_of_release - b.year_of_release;
+                if(sortKey === '-year_of_release') return b.year_of_release - a.year_of_release;
+                if(sortKey === '-imdb_rating') return b.imdb_rating - a.imdb_rating;
                 return 0;
             });
         }
 
+        function setupInfiniteScroll() {
+            const sentinel = document.createElement('div');
+            sentinel.id = 'scroll-sentinel';
+            document.getElementById('viewAllGrid').after(sentinel);
 
-function setupInfiniteScroll() {
-    const sentinel = document.createElement('div');
-    sentinel.id = 'scroll-sentinel';
-    document.getElementById('viewAllGrid').after(sentinel);
+            observer = new IntersectionObserver(async ([entry]) => {
+                if (entry.isIntersecting && !isLoading && 
+                    allMoviesPage * pageSize < movies.length) {
+                    isLoading = true;
+                    document.getElementById('loader').style.display = 'block';
+                    
+                    allMoviesPage++;
+                    await renderViewAll(allMoviesPage);
+                    
+                    isLoading = false;
+                    document.getElementById('loader').style.display = 'none';
+                }
+            }, { threshold: 0.5 });
 
-    observer = new IntersectionObserver(async ([entry]) => {
-        if (entry.isIntersecting && !isLoading && 
-            allMoviesPage * pageSize < movies.length) {
-            isLoading = true;
-            document.getElementById('loader').style.display = 'block';
-            
-            allMoviesPage++;
-            await renderViewAll(allMoviesPage);
-            
-            isLoading = false;
-            document.getElementById('loader').style.display = 'none';
-        }
-    }, { threshold: 0.5 });
-
-    observer.observe(sentinel);
-}
-
-        // Utility functions
-        function shuffleArray(array) {
-            return array.sort(() => Math.random() - 0.5);
+            observer.observe(sentinel);
         }
 
-function createMovieTileElement(m) {
-    const tile = document.createElement('div');
-    tile.className = 'movie-tile';
-    tile.onclick = () => window.open(m['YouTube Link'], '_blank');
-    
-    const thumbnailUrl = m.Thumbnail 
-        ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
-        : 'https://pngimg.com/uploads/square/square_PNG95.png';
-
-    tile.innerHTML = `
-        <img src="${thumbnailUrl}" 
-             class="movie-thumbnail"
-             loading="lazy">
-        <div class="movie-info">
-            <p class="movie-title">${m['Movie Name']}</p>
-            <p class="movie-year">${m.Year}</p>
-        </div>
-    `;
-    
-    return tile;
-}
-
-   function createMovieTile(m) {
-            const thumbnailUrl = m.Thumbnail
-                ? m.Thumbnail.replace('?sqp=', '?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==')
-                : 'https://pngimg.com/uploads/square/square_PNG95.png';
-            return `
-                <div class="movie-tile" onclick="window.open('${m['YouTube Link']}', '_blank')">
-                    <img src="${thumbnailUrl}"
-                         class="movie-thumbnail"
-                         loading="lazy">
-                    <div class="movie-info">
-                        <p class="movie-title">${m['Movie Name']}</p>
-                        <p class="movie-year">${m.Year}</p>
-                    </div>
+        function createMovieTileElement(m) {
+            const tile = document.createElement('div');
+            tile.className = 'movie-tile';
+            tile.onclick = () => showMovieDetail(m.imdb_id);
+            
+            tile.innerHTML = `
+                <img src="${m.poster_path}" 
+                     class="movie-thumbnail"
+                     loading="lazy">
+                <div class="movie-info">
+                    <p class="movie-title">${m.title}</p>
+                    <p class="movie-year">${m.year_of_release}</p>
                 </div>
             `;
+            
+            return tile;
+        }
+
+        function showMovieDetail(imdbId) {
+            const movie = movies.find(m => m.imdb_id === imdbId);
+            if (!movie) return;
+
+            const stars = Math.round((movie.imdb_rating / 2) * 10) / 10; // Convert to 5-star scale
+            const starIcons = Array.from({length: 5}, (_, i) => 
+                `<i class="fas fa-star ${i < Math.floor(stars) ? 'fas' : 'far'}"></i>`
+            ).join('');
+
+            const modalContent = `
+                <img src="${movie.poster_path}" class="modal-poster" alt="${movie.title}">
+                <div class="modal-details">
+                    <h1 class="modal-title">
+                        ${movie.title}
+                        ${movie.has_wins_nominations ? '<i class="fas fa-trophy" title="Award winning"></i>' : ''}
+                    </h1>
+                    <div class="modal-meta">
+                        <span>${movie.year_of_release}</span>
+                        <span>•</span>
+                        <span>${movie.runtime > 0 ? `${movie.runtime} mins` : 'Runtime N/A'}</span>
+                        <span>•</span>
+                        <div class="modal-rating">
+                            ${starIcons}
+                            <span>${stars}/5</span>
+                        </div>
+                    </div>
+                    <div class="modal-links">
+                        ${movie.imdb_link ? `<a href="${movie.imdb_link}" class="modal-link" target="_blank">
+                            <i class="fab fa-imdb"></i> IMDB
+                        </a>` : ''}
+                        ${movie.wiki_link ? `<a href="${movie.wiki_link}" class="modal-link" target="_blank">
+                            <i class="fab fa-wikipedia-w"></i> Wikipedia
+                        </a>` : ''}
+                    </div>
+                    ${movie.summary ? `
+                        <div class="modal-section">
+                            <h3>Story</h3>
+                            <p>${movie.summary}</p>
+                        </div>
+                    ` : ''}
+                    <div class="modal-section">
+                        <h3>Details</h3>
+                        <p>${formatDetails(movie)}</p>
+                    </div>
+			<button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
+                        <i class="fas fa-play"></i> Watch Now
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('modalContent').innerHTML = modalContent;
+            document.getElementById('movieModal').style.display = 'block';
+        }
+
+        function formatDetails(movie) {
+            const details = [];
+            if (movie.directors?.length) details.push(`Directed by: ${movie.directors.join(', ')}`);
+            if (movie.writers?.length) details.push(`Written by: ${movie.writers.join(', ')}`);
+            if (movie.actors) details.push(`Cast: ${movie.actors.split('|').filter(a => a).join(', ')}`);
+            if (movie.release_date) details.push(`Release Date: ${movie.release_date}`);
+            if (movie.wins_nominations) details.push(`Awards: ${movie.wins_nominations}`);
+            
+            return details.join('<br>');
+        }
+
+        function closeModal() {
+            document.getElementById('movieModal').style.display = 'none';
         }
 
         // Search functionality with debounce
@@ -437,12 +574,14 @@ function createMovieTileElement(m) {
                 }
 
                 const results = movies.filter(m => 
-                    m['Movie Name'].toLowerCase().includes(term) || 
-                    (m.Genre && m.Genre.some(g => g.toLowerCase().includes(term))))
-                    .slice(0, 50);
+                    m.title.toLowerCase().includes(term) || 
+                    (m.genres && m.genres.some(g => g.toLowerCase().includes(term)))
+                ).slice(0, 50);
 
                 resultsContainer.style.display = 'block';
-                document.getElementById('resultsContainer').innerHTML = results.map(createMovieTile).join('');
+                document.getElementById('resultsContainer').innerHTML = results.map(m => 
+                    createMovieTileElement(m).outerHTML
+                ).join('');
             }, 300);
         });
 
@@ -454,6 +593,12 @@ function createMovieTileElement(m) {
             renderViewAll();
         });
 
+        // Utility functions
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // Initialize
         loadMovies();
     </script>
 </body>
