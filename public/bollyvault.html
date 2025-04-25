@@ -234,6 +234,16 @@
             color: gold;
         }
 
+        .modal-stars .fas.fa-star {
+            color: gold;
+        }
+        .modal-stars .fas.fa-star-half-alt {
+            color: gold;
+        }
+        .modal-stars .far.fa-star {
+            color: #666;
+        }
+
         .modal-links {
             display: flex;
             gap: 10px;
@@ -294,6 +304,8 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+
     </style>
 </head>
 <body>
@@ -476,8 +488,9 @@
         function createMovieTileElement(m) {
             const tile = document.createElement('div');
             tile.className = 'movie-tile';
-            tile.onclick = () => showMovieDetail(m.imdb_id);
-            
+            tile.dataset.imdbId = m.imdb_id;
+	    //tile.onclick = () => showMovieDetail(m.imdb_id);
+             
             tile.innerHTML = `
                 <img src="${m.poster_path}" 
                      class="movie-thumbnail"
@@ -491,59 +504,74 @@
             return tile;
         }
 
-        function showMovieDetail(imdbId) {
-            const movie = movies.find(m => m.imdb_id === imdbId);
-            if (!movie) return;
+function showMovieDetail(imdbId) {
+    const movie = movies.find(m => m.imdb_id === imdbId);
+    if (!movie) return;
 
-            const stars = Math.round((movie.imdb_rating / 2) * 10) / 10; // Convert to 5-star scale
-            const starIcons = Array.from({length: 5}, (_, i) => 
-                `<i class="fas fa-star ${i < Math.floor(stars) ? 'fas' : 'far'}"></i>`
-            ).join('');
-
-            const modalContent = `
-                <img src="${movie.poster_path}" class="modal-poster" alt="${movie.title}">
-                <div class="modal-details">
-                    <h1 class="modal-title">
-                        ${movie.title}
-                        ${movie.has_wins_nominations ? '<i class="fas fa-trophy" title="Award winning"></i>' : ''}
-                    </h1>
-                    <div class="modal-meta">
-                        <span>${movie.year_of_release}</span>
-                        <span>•</span>
-                        <span>${movie.runtime > 0 ? `${movie.runtime} mins` : 'Runtime N/A'}</span>
-                        <span>•</span>
-                        <div class="modal-rating">
-                            ${starIcons}
-                            <span>${stars}/5</span>
-                        </div>
-                    </div>
-                    <div class="modal-links">
-                        ${movie.imdb_link ? `<a href="${movie.imdb_link}" class="modal-link" target="_blank">
-                            <i class="fab fa-imdb"></i> IMDB
-                        </a>` : ''}
-                        ${movie.wiki_link ? `<a href="${movie.wiki_link}" class="modal-link" target="_blank">
-                            <i class="fab fa-wikipedia-w"></i> Wikipedia
-                        </a>` : ''}
-                    </div>
-                    ${movie.summary ? `
-                        <div class="modal-section">
-                            <h3>Story</h3>
-                            <p>${movie.summary}</p>
-                        </div>
-                    ` : ''}
-                    <div class="modal-section">
-                        <h3>Details</h3>
-                        <p>${formatDetails(movie)}</p>
-                    </div>
-			<button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
-                        <i class="fas fa-play"></i> Watch Now
-                    </button>
-                </div>
-            `;
-
-            document.getElementById('modalContent').innerHTML = modalContent;
-            document.getElementById('movieModal').style.display = 'block';
+    const rating = movie.imdb_rating / 2; // Convert to 5-star scale
+    let starIcons = '';
+    for (let i = 1; i <= 5; i++) {
+        if (rating >= i) {
+            starIcons += '<i class="fas fa-star"></i>';
+        } else if (rating >= i - 0.5) {
+            starIcons += '<i class="fas fa-star-half-alt"></i>';
+        } else {
+            starIcons += '<i class="far fa-star"></i>';
         }
+    }
+
+    const modalContent = `
+        <img src="${movie.poster_path}" class="modal-poster" alt="${movie.title}">
+        <div class="modal-details">
+            <h1 class="modal-title">
+                ${movie.title}
+                ${movie.has_wins_nominations ? '<i class="fas fa-trophy" style="color:goldenrod"></i>' : ''}
+            </h1>
+            <div class="modal-meta">
+                <span>${movie.year_of_release}</span>
+                <span>•</span>
+                <span>${movie.runtime > 0 ? `${movie.runtime} mins` : 'Runtime N/A'}</span>
+                <span>•</span>
+                <div class="modal-rating modal-stars">
+                    ${starIcons}
+                    <span>(${movie.imdb_rating}/10)</span>
+                </div>
+            </div>
+	       <div class="modal-links">
+                  ${movie.imdb_link ? `<a href="${movie.imdb_link}" class="modal-link" target="_blank">
+                  <i class="fab fa-imdb"></i> IMDB</a>` : ''}
+                  ${movie.wiki_link ? `<a href="${movie.wiki_link}" class="modal-link" target="_blank">
+                      <i class="fab fa-wikipedia-w"></i> Wikipedia
+                         </a>` : ''}
+               </div>
+            ${movie.summary ? `
+                <div class="modal-section">
+                    <h3>Story</h3>
+                    <p>${movie.summary}</p>
+                </div>
+            ` : ''}
+            
+	        <div class="modal-section">
+                     <h3>Details</h3>
+                     <p>${formatDetails(movie)}</p>
+                </div>
+            <button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
+                <i class="fas fa-play"></i> Watch Now
+            </button>
+        </div>
+    `;
+
+    const modal = document.getElementById('movieModal');
+    modal.querySelector('.modal-content').innerHTML = modalContent;
+    modal.style.display = 'block';
+
+    // Add click outside handler
+    modal.onclick = function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    };
+}
 
         function formatDetails(movie) {
             const details = [];
@@ -584,6 +612,14 @@
                 ).join('');
             }, 300);
         });
+
+	document.getElementById('resultsContainer').addEventListener('click', function(e) {
+		const tile = e.target.closest('.movie-tile');
+		if (tile) {
+			const imdbId = tile.dataset.imdbId;
+			showMovieDetail(imdbId);
+		}
+	});
 
         // Sorting control
         document.getElementById('viewAllSort').addEventListener('change', (e) => {
