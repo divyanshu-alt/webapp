@@ -182,7 +182,7 @@
             border-radius: 8px;
             padding: 25px;
             position: relative;
-        }
+	}
 
         .modal-close {
             position: absolute;
@@ -284,7 +284,7 @@
             .nav-container { flex-direction: column; gap: 15px; }
             .logo { font-size: 2em; }
             .movie-grid { grid-template-columns: repeat(2, 1fr); }
-            .modal-main { grid-template-columns: 1fr; }
+            .modal-main { grid-template-columns: 1fr;}
             .modal-content { margin: 10px; }
             .modal-title { font-size: 1.5em; }
         }
@@ -562,7 +562,7 @@ function showMovieDetail(imdbId) {
     `;
 
     const modal = document.getElementById('movieModal');
-    modal.querySelector('.modal-content').innerHTML = modalContent;
+    modal.querySelector('#modalContent').innerHTML = modalContent;
     modal.style.display = 'block';
 
     // Add click outside handler
@@ -572,6 +572,14 @@ function showMovieDetail(imdbId) {
         }
     };
 }
+
+document.getElementById('viewAllGrid').addEventListener('click', function(e) {
+    const tile = e.target.closest('.movie-tile');
+    if (tile) {
+        const imdbId = tile.dataset.imdbId;
+        showMovieDetail(imdbId);
+    }
+});
 
         function formatDetails(movie) {
             const details = [];
