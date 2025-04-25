@@ -417,7 +417,8 @@
                             <div class="movie-tile" onclick="showMovieDetail('${m.imdb_id}')">
                                 <img src="${m.poster_path}"
                                      class="movie-thumbnail"
-                                     loading="lazy">
+                                     loading="lazy"
+				     onerror="this.src='${m.poster_path_alt}'; this.onerror='';">
                                 <div class="movie-info">
                                     <p class="movie-title">${m.title}</p>
                                     <p class="movie-year">${m.year_of_release}</p>
@@ -522,7 +523,7 @@ function showMovieDetail(imdbId) {
     }
 
     const modalContent = `
-        <img src="${movie.poster_path}" class="modal-poster" alt="${movie.title}">
+		<img src="${movie.poster_path}" class="modal-poster" alt="${movie.title}" onerror="this.src='${movie.poster_path_alt}'; this.onerror='';">
         <div class="modal-details">
             <h1 class="modal-title">
                 ${movie.title}
@@ -556,9 +557,12 @@ function showMovieDetail(imdbId) {
                      <h3>Details</h3>
                      <p>${formatDetails(movie)}</p>
                 </div>
-            <button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
-                <i class="fas fa-play"></i> Watch Now
-            </button>
+
+	    ${movie['Youtube Link'] ? `
+                <button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
+                    <i class="fas fa-play"></i> Watch Now
+                </button>
+	    ` : `<button class="watch-button"> Coming Soon </button>`}
         </div>
     `;
 
