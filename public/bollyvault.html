@@ -7,10 +7,30 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary: #e50914;
+            --primary: #c8e2e3;
             --background: #141414;
             --text: #fff;
         }
+
+::-webkit-input-placeholder {
+    font-style: italic;
+}
+
+::-moz-placeholder {
+    font-style: italic;
+}
+
+:-moz-placeholder {
+    font-style: italic;
+}
+
+:-ms-input-placeholder {
+    font-style: italic;
+}
+
+::placeholder {
+    font-style: italic;
+}
 
         body {
             background: var(--background);
@@ -21,9 +41,9 @@
         }
 
         .header {
-            position: fixed;
+            position: absolute;
             top: 0;
-            width: 100%;
+            width: 98%;
             background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
             z-index: 1000;
             padding: 15px 20px;
@@ -36,9 +56,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
             margin: 0 auto;
-            width: 100%;
+            width: 98%;
         }
 
         .logo {
@@ -58,26 +77,25 @@
         }
 
         .search-bar {
-            width: 100%;
-            max-width: 1200px;
+            width: 98%;
             margin: 0 auto;
         }
 
         #searchInput {
-            width: 100%;
-            padding: 15px 20px;
-            background: #333;
+            width: 99%;
+            padding: 5px 1px 5px 1px;
+            background: var(--background);
             border: 2px solid #444;
-            color: white;
-            border-radius: 30px;
-            font-size: 1.1em;
+            color: var(--primary);
+            outline: 0;
+	    border-width: 0 0 2px;
+            font-size: 1.0em;
             transition: all 0.3s;
         }
 
         #searchInput:focus {
             outline: none;
             border-color: var(--primary);
-            background: #222;
         }
 
         .view-all-header {
@@ -98,7 +116,7 @@
         }
 
         .category {
-            margin: 40px 20px;
+            margin: 10px 20px;
         }
         .category h2 {
             margin: 0 0 15px 10px;
@@ -268,7 +286,7 @@
 
         .watch-button {
             background: var(--primary);
-            color: white;
+            color: var(--background);
             border: none;
             padding: 12px 25px;
             border-radius: 5px;
@@ -305,26 +323,29 @@
             100% { transform: rotate(360deg); }
         }
 
+        .info-button {
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            padding: 5px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
 
+        .info-button:hover, .info-button:click {
+            border-color: var(--background);
+            color: var(--background);
+        }
     </style>
 </head>
 <body>
     <header class="header">
         <div class="nav-container">
-            <a href="#" class="logo">
-                <i class="fas fa-film"></i>
-                BOLLYVAULT
-            </a>
-            <div class="controls">
-                <select class="sort-select" id="sortSelect">
-                    <option value="name">Sort by Name</option>
-                    <option value="year">Sort by Year</option>
-                    <option value="views">Sort by Views</option>
-                </select>
-            </div>
+		<a href="#" class="logo"><i class="fas fa-film"></i> BOLLYVAULT <i class="fas fa-film"></i></a>
+                <a class="info-button" onclick="showInfoModal()">Info</a>
         </div>
         <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search Vintage Movies...">
+            <input type="text" id="searchInput" placeholder="Search anything">
         </div>
     </header>
     
@@ -360,6 +381,62 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeInfoModal()">&times;</span>
+            <div class="modal-main" style="display:block;" id="infoModalContent">
+                <div class="modal-details">
+                    <h1 class="modal-title"><i class="fas fa-film"></i> BOLLYVAULT <i class="fas fa-film"></i></h1>
+		    <div class="modal-section">
+			<h3><i class="fas fa-info"></i> <u>About</u></h3>
+			<p>This project aims to provide a digital archive preserving India's cinematic heritage through curated classic films, comprehensive metadata and verified streaming links</p>
+			<br/>
+			<h3><i class="fas fa-triangle-exclamation"></i> <u>Important Notes</u></h3>
+			<p><i class="fas fa-check"></i> Link Validity: YouTube videos are hosted by third-party channels. Links may occasionally break due to:</p>
+                        <ul>
+				<li><i class="fas fa-hand"></i> Channel termination</li>
+                          <li><i class="fas fa-globe"></i> Regional restrictions</li>
+                          <li><i class="fas fa-lock"></i> Copyright claims</li>
+                          <li>Some movies might not be accurately matched to video link, due to the nature of AI
+                        </ul>
+                        <p>We actively monitor and update links. Report broken videos to <a style="color: var(--primary);" href="mailto:dev.verma1010@gmail.com">dev.verma1010@gmail.com</a></p>
+                        
+			<br/>
+<h3><i class="fas fa-hands-praying"></i> <u>Credits & Resources</u></h3>
+<p><i class="fas fa-robot"></i> AI Assistance:</p><ul><li>ChatGPT &amp; DeepSeek for<ul><li>Website design and code</li><li>Node backend server code</li><li>Python and Google App Scripting for metadata extraction and organization</li></ul></li></ul>
+
+<p><i class="fas fa-video"></i> Movie Database:</p><ul><li>Powered by <i class="fab fa-github-alt"></i> <a style="color:var(--primary);text-decoration:none;" href="https://github.com/pncnmnp/TIMDB" target="_blank">TIMDB Indian Movie Database</a> Repository</li></ul>
+
+<p><i class="fas fa-photo-film"></i> Media Sources:</p>
+<ul>
+	<li><i class="fab fa-wikipedia-w"></i> Wikimedia Commons (Posters &amp; Metadata)</li>
+	<li><i class="fab fa-imdb"></i> IMDB (Posters &amp; Metadata)</li>
+  <li><i class="fab fa-youtube"></i> YouTube Channels (Video Links)</li>
+</ul>
+
+<p><i class="fas fa-screwdriver-wrench"></i> Technical Tools:</p>
+<ul>
+  <li><a href="https://github.com/yt-dlp/yt-dlp" target="_blank" style="color:var(--primary);">yt-dlp</a> for channel video link extraction</li>
+  <li>Node JS server <i class="fab fa-node"></i></li>
+  <li>Hosted on AWS <i class="fab fa-aws"></i></li>
+</ul>
+<br/>
+   <h3><i class="fas fa-address-card"></i> <u>Contact Me:</u></h3>
+                        <ul>
+                            <li style="margin-top: 5px;"><a href="https://www.linkedin.com/in/divyanshu-verma/" class="modal-link" target="_blank"><i class="fab fa-linkedin-in"></i> divyanshu-verma</a></li>
+                            <li style="margin-top: 5px;"><a href="https://github.com/divyanshuverma" class="modal-link" target="_blank"><i class="fab fa-github-alt"></i> divyanshuverma</a></li>
+                            <li style="margin-top: 5px;"><a href="https://github.com/divyanshu-alt" class="modal-link" target="_blank"><i class="fab fa-github-alt"></i> divyanshu-alt</a></li>
+                            <li style="margin-top: 5px;"><a href="https://divyanshuverma.in" class="modal-link" target="_blank"><i class="fas fa-globe"></i> divyanshuverma.in</a></li>
+                            <li style="margin-top: 5px;"><a href="mailto:dev.verma1010@gmail.com" class="modal-link" target="_blank"><i class="far fa-envelope"></i> dev.verma1010@gmail.com</a></li>
+                        </ul>
+                        <br/>
+			<h3><i class="fas fa-heart"></i> Made by cinema lovers for cinema lovers</h3>
+		    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let movies = [];
         let allMoviesPage = 1;
@@ -378,23 +455,31 @@
 
         function generateCategories() {
             const categories = [
-                { 
-                    name: "Staff Picks", 
-                    filter: m => m.imdb_rating > 7,
+                {
+                    name: "Watch Now ▶️",
+                    filter: m => m.watch_link != null,
+                    randomize: true
+                },
+                {
+                    name: "Critics' Crushes ⭐️", 
+                    filter: m => m.watch_link!=null && m.imdb_rating > 8,
                     sort: (a,b) => b.imdb_rating - a.imdb_rating,
                     randomize: true
                 },
                 { 
-                    name: "Classic Era", 
-                    filter: m => m.movie_era === 'Classic'
+                    name: "Vintage Vibes 🎬 [60s & 70s]", 
+                    filter: m => m.watch_link!=null && m.movie_era === 'Classic',
+                    randomize: true
                 },
                 { 
-                    name: "Golden Era", 
-                    filter: m => m.movie_era === 'Golden'
+                    name: "Back to the VCR 📼 [80s & 90s]", 
+                    filter: m => m.watch_link!=null && m.movie_era === 'Golden',
+                    randomize: true
                 },
                 { 
-                    name: "Modern Era", 
-                    filter: m => m.movie_era === 'Modern'
+                    name: "21st Century Gems 💎",
+                    filter: m => m.watch_link!=null && m.movie_era === 'Modern',
+                    randomize: true
                 }
             ];
 
@@ -455,11 +540,11 @@
 
         function sortMovies(movies, sortKey) {
             return [...movies].sort((a,b) => {
-                if(sortKey === 'title') return a.title.localeCompare(b.title);
-                if(sortKey === '-title') return b.title.localeCompare(a.title);
-                if(sortKey === 'year_of_release') return a.year_of_release - b.year_of_release;
-                if(sortKey === '-year_of_release') return b.year_of_release - a.year_of_release;
-                if(sortKey === '-imdb_rating') return b.imdb_rating - a.imdb_rating;
+		if(sortKey === 'title') return (b.watch_link != null) - (a.watch_link != null) || a.title.localeCompare(b.title);
+                if(sortKey === '-title') return (b.watch_link != null) - (a.watch_link != null) || b.title.localeCompare(a.title);
+                if(sortKey === 'year_of_release') return (b.watch_link != null) - (a.watch_link != null) || a.year_of_release - b.year_of_release;
+                if(sortKey === '-year_of_release') return (b.watch_link != null) - (a.watch_link != null) || b.year_of_release - a.year_of_release;
+                if(sortKey === '-imdb_rating') return (b.watch_link != null) - (a.watch_link != null) ||  b.imdb_rating - a.imdb_rating;
                 return 0;
             });
         }
@@ -558,8 +643,8 @@ function showMovieDetail(imdbId) {
                      <p>${formatDetails(movie)}</p>
                 </div>
 
-	    ${movie['Youtube Link'] ? `
-                <button class="watch-button" onclick="window.open('${movie['YouTube Link']}', '_blank')">
+	    ${movie.watch_link ? `
+                <button class="watch-button" onclick="window.open('${movie.watch_link}', '_blank')">
                     <i class="fas fa-play"></i> Watch Now
                 </button>
 	    ` : `<button class="watch-button"> Coming Soon </button>`}
@@ -590,7 +675,7 @@ document.getElementById('viewAllGrid').addEventListener('click', function(e) {
             const details = [];
             if (movie.directors?.length) details.push(`Directed by: ${movie.directors.join(', ')}`);
             if (movie.writers?.length) details.push(`Written by: ${movie.writers.join(', ')}`);
-            if (movie.actors) details.push(`Cast: ${movie.actors.split('|').filter(a => a).join(', ')}`);
+            if (movie.actors) details.push(`Cast: ${movie.actors.join(', ')}`);
             if (movie.release_date) details.push(`Release Date: ${movie.release_date}`);
             if (movie.wins_nominations) details.push(`Awards: ${movie.wins_nominations}`);
             
@@ -599,6 +684,14 @@ document.getElementById('viewAllGrid').addEventListener('click', function(e) {
 
         function closeModal() {
             document.getElementById('movieModal').style.display = 'none';
+        }
+
+        function closeInfoModal() {
+            document.getElementById('infoModal').style.display = 'none';
+        }
+
+        function showInfoModal() {
+            document.getElementById('infoModal').style.display = 'block';
         }
 
         // Search functionality with debounce
@@ -616,7 +709,9 @@ document.getElementById('viewAllGrid').addEventListener('click', function(e) {
 
                 const results = movies.filter(m => 
                     m.title.toLowerCase().includes(term) || 
-                    (m.genres && m.genres.some(g => g.toLowerCase().includes(term)))
+                    (m.genres && m.genres.some(g => g.toLowerCase().includes(term))) ||
+                    (m.writers && m.writers.some(w => w.toLowerCase().includes(term))) ||
+                    (m.directors && m.directors.some(d => d.toLowerCase().includes(term)))
                 ).slice(0, 50);
 
                 resultsContainer.style.display = 'block';
