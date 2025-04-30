@@ -663,6 +663,13 @@ function showMovieDetail(imdbId) {
     };
 }
 
+const infoModal = document.getElementById('infoModal');
+infoModal.onclick = function(event) {
+        if(event.target === infoModal) {
+            closeInfoModal();
+        }
+};
+
 document.getElementById('viewAllGrid').addEventListener('click', function(e) {
     const tile = e.target.closest('.movie-tile');
     if (tile) {
