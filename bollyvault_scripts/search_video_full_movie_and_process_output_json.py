@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--output-csv', default='output.csv', help='Output CSV file path')
     parser.add_argument('--batch-size', type=int, help='Number of rows to process in each batch')
     parser.add_argument('--batch-index', type=int, help='Index of the current batch (0-based)')
+    parser.add_argument('--only-process-json', default=False, help='Only create output json using output csv arg')
     return parser.parse_args()
 
 def initialize_output(output_csv, fieldnames):
@@ -108,7 +109,7 @@ def parse_duration(duration_str: str) -> int:
         return 0
 
 def search_youtube_noapi(movie_name: str, year: str) -> Optional[Dict]:
-    base_query = f"{movie_name} {clean_year(year)} full movie -songs -lyrics -album"
+    base_query = f"{movie_name} {clean_year(year)} full movie -songs -song -lyrics -lyric -album -albums -review -reviews -fact -facts -bioscope -part -episode -cinemaghar"
     print(f"\n[DEBUG] Search Query: {base_query}")
     
     try:
@@ -230,7 +231,7 @@ def process_csv(args):
                 relevance = 'H' if channel_id in whitelisted_channels else 'M' if (subs or 0) >= 100000 else 'L'
 
                 output_row.update({
-                    'YouTube Link': video_info['link'],
+                    'YouTube Link': video_info['watch_link'],
                     'Video Title': video_info['title'],
                     'Duration (HH:MM:SS)': format_duration(video_info['duration']),
                     'Thumbnail': video_info['thumbnail'],
@@ -279,10 +280,10 @@ def process_json(args):
     df['genres'] = df['genres'].fillna('').apply(lambda x: x.split('|') if x else [])
     df['directors'] = df['directors'].fillna('').apply(lambda x: x.split('|') if x else [])
     df['writers'] = df['writers'].fillna('').apply(lambda x: x.split('|') if x else [])
-    
+    df['actors'] = df['actors'].fillna('').apply(lambda x: x.split('|') if x else [])
     df['imdb_rating'] = pd.to_numeric(df['imdb_rating'], errors='coerce')
     df['has_wins_nominations'] = df['wins_nominations'].notna() & (df['wins_nominations'] != '')
-    
+ 
     # Calculate movie era
     def get_movie_era(year):
         if pd.isna(year):
@@ -309,6 +310,14 @@ def process_json(args):
 
 def main():
     args = parse_args()
+    if(args.only_process_json):
+        if(args.output_csv is None):
+            print(f"Pass an --output-csv as well to process json from it")
+            return None
+        
+        process_json(args)
+        return None
+
     process_csv(args)
     process_json(args)
 

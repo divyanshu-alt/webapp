@@ -1,0 +1,67 @@
+I have two csv files
+main.csv -> Contains two columns: title and year_of_release of hindi bollywood movies
+Sample:
+title	year_of_release
+3 Idiots	2009
+3 Storeys	2018
+31st October	2015
+36 China Town	2006
+video_links.csv -> Contains 4 columns: url, normalized_translated_title_n_desc, year_optional, translated_title_n_desc of youtube video links found by scrapping
+Sample:
+url
+normalized_translated_title_n_desc
+year_optional
+translated_title_n_desc
+https://www.youtube.com/watch?v=-IaEaYA8X1c
+ragini mms returns karishma sharma riya sen siddharth gupta dilnaz irani hindi movie 2024 raginimmsreturnsfullmovie raginimmsreturns karishmasharma riyasen siddharthgupta film ragini mms returns starcast karishma sharma riya sen siddharth gupta dilnaz irani harsh
+Ragini MMS Returns | Karishma Sharma, Riya Sen, Siddharth Gupta, Dilnaz Irani | Hindi Movie 2024 #raginimmsreturnsfullmovie #raginimmsreturns #karishmasharma #riyasen #siddharthgupta
+Film - Ragini MMS Returns
+Starcast - Karishma Sharma, Riya Sen, Siddharth Gupta, Dilnaz Irani, Harsh...
+https://www.youtube.com/watch?v=iQFYXtE6Wx0
+sangam 1964 full film raj kapoor vyjayanthimala and rajendra kumar s a classic romantic drama sangam 1964 full film raj kapoor vaijayanti mala and rajendra kumar s a classic romantic drama
+1964
+Sangam 1964 Full Film - Raj Kapoor, Vyjayanthimala and Rajendra Kumar's A Classic Romantic Drama Sangam 1964 Full Film - Raj Kapoor, Vaijayanti Mala and Rajendra Kumar's A Classic Romantic Drama.
+https://www.youtube.com/watch?v=WczVepo7fKw
+netaji subhas chandra bose the forgotten hero 2004 full hindi movie sachin khedekar the film depicts the life of the indian independence leader subhas chandra bose in nazi germany 1941 1943 and in japanese occupied asia 1943 1945 and the events leading to the formation
+2004
+Netaji Subhas Chandra Bose : The Forgotten Hero (2004) Full Hindi Movie | Sachin Khedekar The film depicts the life of the Indian independence leader Subhas Chandra Bose in Nazi Germany: 1941–1943, and In Japanese-occupied Asia 1943–1945, and the events leading to the formation...
+https://www.youtube.com/watch?v=tsMdZ9_qQR0
+netaji subhas chandra bose republic day special movie sachin khedekar kulbhushan kharbanda the film depicts the life of the indian independence leader subhas chandra bose in nazi germany 1941 1943 and in japanese occupied asia 1943 1945 and the events leading to the formation
+2004
+Netaji Subhas Chandra Bose | Republic Day Special Movie | Sachin Khedekar, Kulbhushan Kharbanda The film depicts the life of the Indian independence leader Subhas Chandra Bose in Nazi Germany: 1941–1943, and In Japanese-occupied Asia 1943–1945, and the events leading to the formation...
+Output csv format:
+movie_title, year_of_release, best_url, best_score, best_year_matches, other_closer_url1, other_closer_score1, other_closer_year_matches1, [other_closer_url2, other_closer_score2, other_closer_year_matches2...]
+As a seasoned technical architect, write a python script to match video links to movie titles
+
+do make movie title lowercase
+
+use only normalized_translated_title_n_desc and year_optional to match from video_links csv
+
+assume that a movie title would occur in the same word order in a video link
+
+there can be duplicate movie titles, but their year_of_release will be different
+
+*_year_matches columns are boolean which indicates if the video link had years also matched with movie title's year or not
+
+A video link can only be one movie_title's best_url/score/year_matches which matches the best as per rules specified below, but can occur for multiple movie_title's other_closer_url/score/year_matches columns based on scoring. You can create a set and knock off video title's for best_ matching, but keep for other_closer matching
+
+It is okay if a movie title does not have a 'best' match, as the video link for it might not be present in the csv. Do not over fit for best match. Howeve for other_closer url's, choose some video_link which matches closest other than best.
+
+if a video link has a title like "aaj aur kal hindi full movie sunil dutt nanda ashok kumar tanuja hit hindi movie download the app now and share it with all the asli fans https shemaroome app link 0xz0pmf9cx give a missed call on 18002665151 www shemaroome com aaj aur kal is the story of a king balbir", and there are two movie titles "aaj" and "aaj aur kal", it should match "aaj aur kal" and not "aaj". The video link would match to the longest movie title that it can match completely.
+
+The matching should be so that movie name "Aaj" should not match video link "vapsi saajan ki 1995 full hindi movie shoaib khan shoma sircar ashwini bhave rita bhaduri a wife learns that her husband was forced to marry her due to some circumstances and he leaves her thus her quest to bring him back begins will they unite movie vapsi saajan ki 1995" because "aaj" is inside the word "saajan" and does not occur independently.
+
+year_optional as the name suggests may or may not be populated. However, if a video link has year_optional and it matches the movie title year_of_release, then it is a stronger signal to match video link to movie title, if movie title also occurs exactly in video link.
+
+As there can be two movies with the same name, if years are also present, it should match with the one where year matches. For example, with movie titles a) "aaina","1977" and b) "aaina", "1993", video_link title "aaina 1977 hd full hindi movie rajesh khanna mumtaz a k hangal nirupa roy rita bhaduri after shalini stops her mother from poisoning everyone in their house she gets a job and feeds her family however when her former lover realises the nature of her employment it changes" should match a)"aaina", "1977"
+Other requirements regarding code:
+
+Do not optimize the code for performance, but for accuracy and better results. The code can have multiple passes to run for finding best_ link matches and other_* link matches as required. There is no constraint on memory or time.
+
+It is okay to have different algos for best and other_closer matching. Think thoroughly what would be the logic to match based on all rules given here.
+
+Put multiple debug print statements to indicate status on console at every checkpoint, like best video found with scores, other_* video found with scores, processing which movie_title, etc. It's okay to make it verbose.
+-  The csv files should be accepted as arguments
+-  Accept argument for how many other_closer links with scores/year_matches should be calculated. Sample output here shows 1 best + 2 other_closer matching.
+-  The code should handle and flush to output csv regularly to avoid missing data in case of sigkill / etc
+
