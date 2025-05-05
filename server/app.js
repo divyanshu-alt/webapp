@@ -25,8 +25,8 @@ app.get('/bollyvault', (req, res) => {
   res.sendFile(path.join(PUBLIC, 'bollyvault.html'));
 });
 
-app.get('/lobby', (req, res) => {
-  res.sendFile(path.join(PUBLIC, 'lobby.html'));
+app.get('/flashchat', (req, res) => {
+  res.sendFile(path.join(PUBLIC, 'flashchat.html'));
 });
 
 class Lobby {

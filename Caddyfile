@@ -6,7 +6,7 @@ divyanshuverma.in, www.divyanshuverma.in {
     path /socket.io*
     path /cv
     path /bollyvault
-    path /lobby
+    path /flashchat
   }
 
   reverse_proxy @backend app:3000

@@ -11,7 +11,7 @@
       gtag('js', new Date());
       gtag('config', 'G-4K7ZSG6XT3');
     </script> 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <style>
@@ -525,9 +525,38 @@
           font-style: italic;
           margin-bottom: 8px;
         }
+	.nav-container {
+	  position: absolute;
+	  left: 50%;
+	  transform: translate(-50%, 0%);
+	  top: 20px;
+	}
+	.bolt-icon {
+	  color: gold;
+	  font-size: 3em;
+	  -webkit-text-stroke: 2px #cd860e;
+	}
+	.logo {
+	  font-size: 3em;
+	  font-family: 'Inter';
+	  font-weight: 800;
+	  color: #d89696;
+	  -webkit-text-stroke: 2px #a92a2a;
+	  border: 1ps solid red;
+	}
+
+	@media (max-width: 768px) {
+	  .logo { font-size: 2em; }
+	  .bolt-icon { font-size: 1em; }
+	}
     </style>
 </head>
 <body>
+    <div class="nav-container">
+        <i class="material-icons bolt-icon">electric_bolt</i>
+	<span class="logo">FlashChat</span>
+	<i class="material-icons bolt-icon">electric_bolt</i>
+    </div>
     <!-- Auth Flow Container -->
     <div class="auth-container" id="authContainer">
         <div class="auth-flow">
