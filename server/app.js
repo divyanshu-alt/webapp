@@ -11,8 +11,12 @@ const io = new Server(server);
 const PORT = 3000;
 const PUBLIC = path.join(__dirname, '../public');
 const COLOR_PALETTE = [
-  '#6c5ce7', '#00b894', '#fd79a8', '#fdcb6e', '#74b9ff',
-  '#55efc4', '#ff7675', '#a29bfe', '#ffeaa7', '#81ecec'
+  '#ECB287', '#5D8B5F', '#F9CDC3', '#F1D074', 
+  '#FC7E04', '#61216A', '#BDCC30', '#F9E9E5', 
+  '#F33F71', '#2FA8B5', '#FCEFDB', '#F6E1E4',
+  '#DFB1D5', '#F1D3C4', '#AFC2DA', '#F4D0B4',
+  '#242329', '#37707D', '#EBDBD7', '#CB82B2',
+  '#B8D097', '#DFE4C0', '#E6E5EB'
 ];
 
 app.use(express.static(PUBLIC));
