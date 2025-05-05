@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="black" />
   <title>Divyanshu Verma</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-4K7ZSG6XT3"></script>
   <script>
@@ -28,9 +29,8 @@
       overflow: hidden;
     }
     @keyframes pulseBg {
-      0%   { background-color: #000; }
-      50%  { background-color: #111; }
-      100% { background-color: #000; }
+      0%, 100% { background-color: #000; }
+      50% { background-color: #222; }
     }
     /* Twinkling star style */
     .star {
@@ -44,7 +44,7 @@
     }
     @keyframes blink {
       0%, 100% { opacity: 0; }
-      50%      { opacity: 1; }
+      50% { opacity: 1; }
     }
     .center-content {
       position: absolute;
@@ -56,17 +56,14 @@
       animation: fadeIn 0.5s ease 0.25s forwards;
     }
     .center-content h1 {
-      font-size: 5em;
+      font-size: 4em;
       font-weight: 300;
       margin: 0;
     }
-    .bottom-content {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
+    .socials {
       opacity: 0;
       animation: fadeIn 0.75s ease 1s forwards;
+      margin-top: 20px;
     }
     .socials a {
       margin: 0 10px;
@@ -77,20 +74,17 @@
       transition: transform 0.2s;
     }
     .socials a:hover {
-      transform: scale(1.5);
+      transform: scale(1.25);
     }
     @keyframes fadeIn {
       from { opacity: 0; }
-      to   { opacity: 1; }
+      to   { opacity: 0.7; }
     }
   </style>
 </head>
 <body>
   <div class="center-content">
     <h1>Divyanshu Verma</h1>
-  </div>
-
-  <div class="bottom-content">
     <div class="socials">
       <a href="https://www.linkedin.com/in/divyanshu-verma/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
       <a href="https://divyanshuverma.in/cv" target="_blank"><i class="fas fa-briefcase"></i></a>
@@ -101,25 +95,30 @@
   </div>
 
   <script>
-    // Generate twinkling stars in the background
-    document.addEventListener('DOMContentLoaded', function() {
-      const starCount = 60;
-      for (let i = 0; i < starCount; i++) {
+    function r(start, end) {
+      return Math.random()*(end-start) + start;
+    }
+
+    function createStar(top, left, duration, delay, size) {
         const star = document.createElement('div');
         star.className = 'star';
-        // Random position within the viewport
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top  = Math.random() * 100 + '%';
-        // Random blink duration (2-5s) and delay (0-5s)
-        const duration = 2 + Math.random() * 3;
-        const delay = Math.random() * 5;
+        star.style.left = left + '%';
+        star.style.top  = top + '%';  
         star.style.animationDuration = duration + 's';
-        star.style.animationDelay = delay + 's';
-        // Random star size between 1px and 3px
-        const size = (Math.random() * 2 + 1) + 'px';
-        star.style.width = size;
-        star.style.height = size;
-        document.body.appendChild(star);
+        star.style.animationDelay = delay + 's'; 
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        return star;
+    }
+
+    // Generate twinkling stars in the background
+    document.addEventListener('DOMContentLoaded', function() {
+      const stars = 60;
+      for(let i=0; i<stars; i++) {
+        document.body.appendChild(createStar(r(0,100), r(0,100), r(2,5), r(0,5), r(1,5)));
+      }
+      for(let i=0; i<stars/6; i++) {
+        document.body.appendChild(createStar(r(0,100), r(0,100), r(1,2), r(0,5), r(1,5)));
       }
     });
   </script>
