@@ -17,6 +17,18 @@ const COLOR_PALETTE = [
 
 app.use(express.static(PUBLIC));
 
+app.get('/cv', (req, res) => {
+  res.sendFile(path.join(PUBLIC, 'cv.pdf'));
+});
+
+app.get('/bollyvault', (req, res) => {
+  res.sendFile(path.join(PUBLIC, 'bollyvault.html'));
+});
+
+app.get('/lobby', (req, res) => {
+  res.sendFile(path.join(PUBLIC, 'lobby.html'));
+});
+
 class Lobby {
   constructor(code) {
     this.code = code;

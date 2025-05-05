@@ -3,9 +3,10 @@ divyanshuverma.in, www.divyanshuverma.in {
   file_server
 
   @backend {
-    path /api/*
-    path /game/*
     path /socket.io*
+    path /cv
+    path /bollyvault
+    path /lobby
   }
 
   reverse_proxy @backend app:3000

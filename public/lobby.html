@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Lobby</title>
+    <title>Chat Lobby</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4K7ZSG6XT3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4K7ZSG6XT3');
+    </script> 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -971,8 +978,8 @@
         function shareViaNative() {
             if (navigator.share) {
                 navigator.share({
-                    title: 'Join my game lobby',
-                    text: `Join my game lobby using code: ${currentLobby}`,
+                    title: 'Join my chat lobby',
+                    text: `Join my chat lobby using code: ${currentLobby}`,
                     url: `${window.location.origin}${window.location.pathname}?lobby=${currentLobby}`
                 }).catch(err => {
                     console.log('Error sharing:', err);
