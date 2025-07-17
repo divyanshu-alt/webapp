@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const { Server } = require('socket.io');
 const http = require('http');
+const https = require('https');
 const { generateSlug } = require('random-word-slugs');
 
 const app = express();
@@ -19,9 +20,50 @@ const COLOR_PALETTE = [
   '#B8D097', '#DFE4C0', '#E6E5EB'
 ];
 
+const GA_MEASUREMENT_ID = 'G-4K7ZSG6XT3';
+const GA_API_SECRET = 'fNkFBH2HTA2WQ5qvTBU8UA';
+
+function sendGAEvent(clientIP) {
+  const postData = JSON.stringify({
+    client_id: clientIP || '555.abc.123',
+    events: [
+      {
+        name: 'cv_download',
+        params: {
+          event_category: 'PDF',
+          event_label: 'CV Download',
+          value: 1
+        }
+      }
+    ]
+  });
+
+  const options = {
+    hostname: 'www.google-analytics.com',
+    path: `/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(postData)
+    }
+  };
+
+  const req = https.request(options, res => {
+    res.on('data', () => {});
+  });
+
+  req.on('error', err => {
+    console.error('GA4 event failed:', err.message);
+  });
+
+  req.write(postData);
+  req.end();
+}
+
 app.use(express.static(PUBLIC));
 
 app.get('/cv', (req, res) => {
+  sendGAEvent(req.ip);
   res.sendFile(path.join(PUBLIC, 'cv.pdf'));
 });
 
