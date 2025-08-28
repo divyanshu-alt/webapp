@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Verma & Associates — Income Tax, GST & Legal Consulting</title>
+    <meta name="description" content="Verma & Associates — Trusted. Timely. Transparent. Income Tax Returns, GST registration & filing, TDS compliance, Insurance consulting, Business setup, Investigation & document search."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+          --bg:#f6f7f9;               /* subtle light grey */
+          --surface:#ffffff;
+          --text:#0f172a;             /* slate-900 */
+          --muted:#475569;            /* slate-600 */
+          --border:#e5e7eb;           /* neutral border */
+          --accent:#111827;           /* dark neutral for CTAs */
+          --shadow:0 16px 40px rgba(2,6,23,.06);
+          --radius:18px;
+          --nav-h:68px;
+        }
+        *{box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+          margin:0; font-family:"Noto Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; color:var(--text);
+          background:var(--bg);
+        }
+        .container{max-width:1200px;margin:0 auto;padding:0 24px}
+        a{color:inherit;text-decoration:none}
+        img{max-width:100%;height:auto}
+
+        /* Top nav — flush with page background */
+        .nav{position:sticky;top:0;z-index:50;background:var(--bg)}
+        .nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
+        .brand{display:flex;gap:12px;align-items:center}
+        .brand img{width:42px;height:auto;display:block}
+        .brand h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.4px}
+        .brand small{display:block;color:var(--muted);font-weight:500}
+        .nav a.link{padding:10px 12px;border-radius:10px}
+        .nav a.link:hover{background:#eef2f7}
+        .cta{display:inline-flex;gap:10px;align-items:center;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;font-weight:700;box-shadow:var(--shadow);border:1px solid #0b1220}
+        .cta:hover{filter:brightness(1.03)}
+
+        /* Sections & anchors */
+        section{padding:120px 0}
+        #services,#process,#about,#faq{scroll-margin-top:calc(var(--nav-h) + 24px)} /* anchor offset fix */
+        .section-title{font-size:40px;letter-spacing:.2px;margin:0 0 6px}
+        .section-sub{color:var(--muted);margin:0 0 24px;font-size:18px}
+
+        /* Brand-first hero */
+        .brand-hero{position:relative;min-height:calc(100vh - var(--nav-h));display:grid;place-items:center}
+        .brand-hero .center{
+          text-align:center;z-index:2; padding:40px 16px
+        }
+        .brand-hero h2{font-size:64px;line-height:1.02;margin:0;font-weight:800;letter-spacing:4px}
+        .brand-hero h2 .amp{font-weight:800}
+        .brand-hero p{margin:10px 0 0;color:#374151;font-weight:600}
+        .wm{position:absolute;right:2%;bottom:4%;width:min(38vw,460px);opacity:.14;filter:grayscale(1);pointer-events:none}
+
+        /* Intro banner with big image + gradient overlay */
+        .intro-banner{position:relative;border-radius:28px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);background:#fff}
+        .intro-media{position:absolute;inset:0;background:#f1f5f9}
+        /* Replace background-image below after generating an image; kept blank by default */
+        .intro-media::before{content:"";position:absolute;inset:0;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:.85}
+        .intro-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,.55),rgba(15,23,42,.25) 35%,rgba(255,255,255,0) 68%)}
+        .intro-content{position:relative;z-index:2;padding:96px 56px 56px;color:#0b1220}
+        .intro-content h3{font-size:36px;margin:0 0 10px}
+        .intro-content p{font-size:18px;max-width:900px;margin:0}
+        .intro-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+        .btn{display:inline-flex;gap:10px;align-items:center;padding:12px 16px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;font-weight:700}
+        .btn:hover{box-shadow:var(--shadow)}
+        .btn.dark{background:var(--accent);border-color:#0b1220;color:#fff}
+
+        /* Content grids */
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+        .card{background:var(--surface);border-radius:22px;border:1px solid var(--border);box-shadow:var(--shadow);padding:22px;transition:transform .2s ease, box-shadow .2s}
+        .card:hover{transform:translateY(-3px);box-shadow:0 22px 50px rgba(2,6,23,.10)}
+        .card h3{margin:6px 0 4px;font-size:20px}
+        .card p{margin:0;color:#374151}
+        .more{margin-top:12px;display:inline-flex;gap:8px;align-items:center;font-weight:700}
+
+        /* Process timeline */
+        .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+        .step{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px;position:relative}
+        .step b{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:#eef2f7;color:#111827;margin-bottom:8px;font-weight:800}
+
+        /* Why us */
+        .why{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}
+        .why ul{margin:0;padding:0 0 0 18px;line-height:1.95;color:#111827}
+
+        /* FAQ */
+        details{background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px}
+        details+details{margin-top:12px}
+        details summary{cursor:pointer;font-weight:700}
+        details[open]{box-shadow:var(--shadow)}
+
+        /* Footer */
+        footer{background:#0b1022;color:#cbd5e1;padding:36px 0 88px}
+        footer .brand h1{color:#fff}
+        .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:24px}
+        .foot-grid a{color:#dbeafe}
+        .foot-bottom{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.08);margin-top:20px;padding-top:12px;color:#94a3b8}
+
+        /* Modals */
+        .overlay{position:fixed;inset:0;background:rgba(2,6,23,.6);display:none;align-items:center;justify-content:center;padding:24px;z-index:60}
+        .overlay.show{display:flex}
+        .modal{max-width:720px;width:100%;background:#fff;border-radius:22px;border:1px solid var(--border);box-shadow:0 30px 80px rgba(2,6,23,.25);overflow:hidden}
+        .modal header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--border)}
+        .modal .content{padding:18px}
+        .x{border:none;background:#eef2f7;width:38px;height:38px;border-radius:10px;cursor:pointer}
+
+        /* Reveal on scroll */
+        .reveal{opacity:0;transform:translateY(14px);transition:all .6s cubic-bezier(.22,1,.36,1)}
+        .reveal.visible{opacity:1;transform:none}
+
+        /* Floating WhatsApp */
+        .wa{position:fixed;right:18px;bottom:18px;background:#15803d;color:#fff;padding:14px 16px;border-radius:999px;box-shadow:var(--shadow);z-index:40;display:flex;align-items:center;gap:8px;font-weight:800}
+
+        /* Responsive */
+        @media (max-width:1024px){
+          .grid{grid-template-columns:repeat(2,1fr)}
+          .steps{grid-template-columns:repeat(2,1fr)}
+          .why{grid-template-columns:1fr}
+          .brand-hero h2{font-size:48px}
+          .intro-content{padding:72px 28px 42px}
+        }
+        @media (max-width:640px){
+          .grid{grid-template-columns:1fr}
+          .steps{grid-template-columns:1fr}
+          .brand-hero h2{font-size:36px;letter-spacing:2px}
+          .foot-grid{grid-template-columns:1fr}
+        }
+
+        @media (prefers-reduced-motion:reduce){
+          html{scroll-behavior:auto}
+          .reveal{transition:none}
+        }
+    </style>
+</head>
+<body>
+<a class="skip" href="#services" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden">Skip to content</a>
+
+<!-- NAVBAR (flush) -->
+<nav class="nav">
+    <div class="container nav-inner">
+        <div class="brand">
+            <!-- Replace src with your attached transparent logo path -->
+            <img id="brand-logo" src="assets/va-logo.png" alt="Verma & Associates Logo"/>
+            <div>
+                <h1 style="margin:0">Verma & Associates</h1>
+                <small>Advocate | Consultant | Investigator</small>
+            </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+            <a class="link" href="#services">Services</a>
+            <a class="link" href="#process">Process</a>
+            <a class="link" href="#about">About</a>
+            <a class="link" href="#faq">FAQ</a>
+            <a class="link" href="#" data-modal="contact">Contact</a>
+        </div>
+    </div>
+</nav>
+
+<!-- BRAND-FIRST HERO (centered brand; watermark on the right) -->
+<header class="brand-hero container">
+    <div class="center">
+        <h2><span style="letter-spacing:.12em">VERMA <span class="amp">&</span> ASSOCIATES</span></h2>
+        <p>Trusted. Timely. Transparent.</p>
+    </div>
+    <!-- Watermark: replace src with provided watermark PNG -->
+    <img id="watermark-image" class="wm" src="assets/watermark-bird.png" alt="Brand watermark"/>
+</header>
+
+<!-- INTRO BANNER (big image with gradient + text on top) -->
+<section class="container" id="intro" style="padding-top:40px">
+    <div class="intro-banner reveal">
+        <div class="intro-media" id="intro-media"></div>
+        <div class="intro-shade" aria-hidden="true"></div>
+        <div class="intro-content">
+            <h3>Tax, GST & Investigation Experts for Individuals & SMBs</h3>
+            <p>End‑to‑end help with <strong>ITR filing</strong>, <strong>GST registration & returns</strong>, <strong>TDS compliance</strong>,
+                <strong>insurance planning</strong> and <strong>business setup</strong>. We are also empanelled <strong>investigators</strong> for banks & insurers.</p>
+            <div class="intro-actions">
+                <a class="btn dark" href="#" data-modal="contact">Book a free call</a>
+                <a class="btn" href="#services">Explore services</a>
+                <a class="btn" href="https://wa.me/919415759262" target="_blank" rel="noopener">WhatsApp +91‑9415759262</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services" class="container">
+    <h3 class="section-title">Services</h3>
+    <p class="section-sub">Full‑stack tax, compliance and investigation under one roof.</p>
+
+    <div class="grid">
+        <article class="card reveal">
+            <h3>Income Tax Return (ITR) Filing</h3>
+            <p>Accurate preparation & e‑filing for salaried, business, capital‑gains and NRI cases. Notices handled.</p>
+            <a class="more" href="#" data-modal="svc-itr">Learn more ▸</a>
+        </article>
+
+        <article class="card reveal">
+            <h3>GST Registration & Returns</h3>
+            <p>New registration, monthly/quarterly GSTR‑1, 3B, annual returns, input credit review, health checks.</p>
+            <a class="more" href="#" data-modal="svc-gst">Learn more ▸</a>
+        </article>
+
+        <article class="card reveal">
+            <h3>TDS Compliance & Advisory</h3>
+            <p>TDS/TCS deduction review, challans, statements, corrections and lower deduction certificate support.</p>
+            <a class="more" href="#" data-modal="svc-tds">Learn more ▸</a>
+        </article>
+
+        <article class="card reveal">
+            <h3>Insurance Planning & Consultation</h3>
+            <p>Risk assessment, policy selection, claims assistance. Empanelled investigators for insurers.</p>
+            <a class="more" href="#" data-modal="svc-ins">Learn more ▸</a>
+        </article>
+
+        <article class="card reveal">
+            <h3>Business Setup & Compliance</h3>
+            <p>Entity selection (Proprietorship/LLP/Company), PAN/TAN, shop & establishment, routine filings.</p>
+            <a class="more" href="#" data-modal="svc-biz">Learn more ▸</a>
+        </article>
+
+        <article class="card reveal">
+            <h3>Document Search & Investigation</h3>
+            <p>Asset tracing, due‑diligence, background checks; private legal investigations for law firms, banks.</p>
+            <a class="more" href="#" data-modal="svc-inv">Learn more ▸</a>
+        </article>
+    </div>
+
+    <div class="card reveal" style="margin-top:20px">
+        <strong>Also available:</strong> Legal Consulting • Legal Case Investigators • Investigation Professional • Bank & Insurance Empanelled Investigator • Business Buddies — Online Work‑from‑Home support.
+    </div>
+</section>
+
+<!-- WHY US -->
+<section class="container" id="about">
+    <div class="why">
+        <div>
+            <h3 class="section-title">Why Verma & Associates?</h3>
+            <p class="section-sub">We blend domain expertise with rigorous process and clear communication.</p>
+            <ul>
+                <li><strong>Single‑window support</strong> across tax, GST, TDS, insurance & investigations.</li>
+                <li><strong>Timelines that stick</strong> — proactive reminders, checklists & status updates.</li>
+                <li><strong>Transparent pricing</strong> with written scope before we begin.</li>
+                <li><strong>Secure data handling</strong> — encrypted storage & access logs.</li>
+            </ul>
+            <div style="margin-top:16px"><a class="btn" href="#" data-modal="contact">Discuss your case</a></div>
+        </div>
+        <!-- Large illustrative photo area -->
+        <div class="intro-banner reveal" style="min-height:380px">
+            <div class="intro-media" id="about-media"></div>
+            <div class="intro-shade" aria-hidden="true"></div>
+            <div class="intro-content" style="padding:48px">
+                <h3 style="color:#fff">Experienced, meticulous, accountable.</h3>
+                <p style="color:#e5e7eb">Advocates & consultants with bank/insurance empanelments and a track record of timely filings.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROCESS -->
+<section class="container" id="process">
+    <h3 class="section-title">How it Works</h3>
+    <p class="section-sub">A simple, documented, 4‑step path from consultation to closure.</p>
+    <div class="steps">
+        <div class="step reveal"><b>1</b><strong>Quick Discovery</strong><br/>Share basic details & goals on a short form or call; we confirm scope and timeline.</div>
+        <div class="step reveal"><b>2</b><strong>Secure Document Flow</strong><br/>Upload documents to a secure link; we validate and create a checklist.</div>
+        <div class="step reveal"><b>3</b><strong>Preparation & Review</strong><br/>We prepare returns/filings; you approve via a summary sheet.</div>
+        <div class="step reveal"><b>4</b><strong>Filing & Handover</strong><br/>We e‑file and share acknowledgements + next‑steps calendar.</div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="container" id="faq">
+    <h3 class="section-title">Frequently Asked Questions</h3>
+    <details class="reveal"><summary>Do you support complex cases (foreign income, ESOPs, capital gains)?</summary><div style="margin-top:8px">Yes — we routinely handle capital‑gains, RSU/ESOP taxation, foreign assets & NRI returns with disclosures.</div></details>
+    <details class="reveal"><summary>Can you represent me for a notice or assessment?</summary><div style="margin-top:8px">We draft responses, prepare working papers, and represent before authorities where applicable.</div></details>
+    <details class="reveal"><summary>How do we share documents securely?</summary><div style="margin-top:8px">We provide a secure upload link with expiring access and store documents in encrypted drives.</div></details>
+    <details class="reveal"><summary>What are your fees?</summary><div style="margin-top:8px">Fees depend on scope & complexity. We share a fixed estimate after discovery — no surprises.</div></details>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="foot-grid">
+            <div>
+                <div class="brand">
+                    <img id="brand-logo-footer" src="assets/va-logo.png" alt="Verma & Associates Logo" style="width:40px"/>
+                    <div>
+                        <h1>Verma & Associates</h1>
+                        <small>Advocate | Consultant | Investigator</small>
+                    </div>
+                </div>
+                <p style="margin:10px 0 0">9/31, Bahar A, Sahara States,<br/>Jankipuram, Lucknow — 226021</p>
+                <p style="margin:6px 0 0">Email: <a href="mailto:pkumar1302@gmail.com">pkumar1302@gmail.com</a></p>
+                <p style="margin:6px 0 0">Phone/WhatsApp: <a href="https://wa.me/919415759262">+91‑9415759262</a> | +91‑8789554514</p>
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;color:#fff">Quick links</h4>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                    <a href="#services">Services</a>
+                    <a href="#process">Process</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="#" data-modal="contact">Contact</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="margin:0 0 8px;color:#fff">Hours</h4>
+                <p style="margin:0">Mon–Sat: 10:00 – 18:30 IST<br/>Sun: By Appointment</p>
+            </div>
+        </div>
+
+        <div class="foot-bottom">
+            <div>© <span id="y"></span> Verma & Associates. All rights reserved.</div>
+            <div>Passion at work — <strong>Trusted. Timely. Transparent.</strong></div>
+        </div>
+    </div>
+</footer>
+
+<!-- Floating WhatsApp CTA -->
+<a class="wa" href="https://wa.me/919415759262" target="_blank" rel="noopener">WhatsApp Us</a>
+
+<!-- MODALS: Contact + Service Details -->
+<div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <header>
+            <strong id="modal-title">Get in touch</strong>
+            <button class="x" aria-label="Close" data-close>✕</button>
+        </header>
+        <div class="content" id="modal-content"></div>
+    </div>
+</div>
+
+<script>
+    // Reveal on scroll
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
+    }, {threshold:.08});
+    document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+    // Modal system
+    const overlay = document.getElementById('overlay');
+    const content = document.getElementById('modal-content');
+    const title = document.getElementById('modal-title');
+
+    const templates = {
+      contact: `
+        <p>Share your details and we'll reach out shortly.</p>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div>
+            <label>Full name</label>
+            <input type="text" placeholder="Your name" style="width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-top:6px"/>
+          </div>
+          <div>
+            <label>Phone / WhatsApp</label>
+            <input type="tel" placeholder="+91‑" style="width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-top:6px"/>
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Query</label>
+            <textarea rows="4" placeholder="Tell us briefly about your requirement" style="width:100%;padding:12px;border:1px solid #e5e7eb;border-radius:12px;margin-top:6px"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+          <a class="btn dark" href="https://forms.gle/your-form-id" target="_blank" rel="noopener">Submit via Google Form</a>
+          <a class="btn" href="mailto:pkumar1302@gmail.com?subject=Enquiry%20from%20Website">Email instead</a>
+        </div>
+        <p style="color:#6b7280;margin-top:8px">Prefer WhatsApp? Message us at <a href="https://wa.me/919415759262">+91‑9415759262</a>.</p>
+      `,
+      'svc-itr': `
+        <h3>ITR Filing — What's included</h3>
+        <ul>
+          <li>Income classification (salary, business/profession, capital gains, other sources)</li>
+          <li>Tax optimisation, rebates & deductions, advance/self‑assessment tax working</li>
+          <li>Preparation & e‑filing of ITR‑1/2/3/4, e‑verification assistance</li>
+          <li>Post‑filing support & rectifications</li>
+        </ul>
+      `,
+      'svc-gst': `
+        <h3>GST Registration & Returns</h3>
+        <ul>
+          <li>New registration, amendments, cancellation</li>
+          <li>Monthly/quarterly GSTR‑1, 3B, annual returns & reconciliation</li>
+          <li>Input tax credit review & vendor compliance checks</li>
+        </ul>
+      `,
+      'svc-tds': `
+        <h3>TDS Compliance & Advisory</h3>
+        <ul>
+          <li>Section‑wise deduction review & applicability</li>
+          <li>Challan payments (ITNS 281), statement preparation & filing</li>
+          <li>26AS/TIS matching & correction statements</li>
+        </ul>
+      `,
+      'svc-ins': `
+        <h3>Insurance Planning & Consultation</h3>
+        <ul>
+          <li>Life, health & general insurance needs analysis</li>
+          <li>Shortlisting of suitable plans and riders</li>
+          <li>Claims documentation and follow‑through</li>
+        </ul>
+      `,
+      'svc-biz': `
+        <h3>Business Setup & Compliance</h3>
+        <ul>
+          <li>Entity selection (Proprietorship, LLP, Company)</li>
+          <li>PAN/TAN, shop & establishment, bank a/c coordination</li>
+          <li>Routine filings calendar & reminders</li>
+        </ul>
+      `,
+      'svc-inv': `
+        <h3>Investigation & Document Search</h3>
+        <ul>
+          <li>Asset tracing & financial background checks</li>
+          <li>Legal case investigation & dossier preparation</li>
+          <li>Empanelled investigator for banks & insurers</li>
+        </ul>
+      `,
+    };
+
+    function openModal(key){
+      title.textContent = key === 'contact' ? 'Get in touch' : 'Service details';
+      content.innerHTML = templates[key] || '<p>Coming soon</p>';
+      overlay.classList.add('show');
+    }
+    function closeModal(){ overlay.classList.remove('show'); }
+    document.querySelectorAll('[data-modal]').forEach(a=>{
+      a.addEventListener('click', (e)=>{ e.preventDefault(); openModal(a.dataset.modal); });
+    });
+    document.querySelector('[data-close]').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+    // Footer year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Optional: Set large banner images by JS if available
+    // Replace with generated images; keeping empty background by default keeps clean, Apple-like whitespace
+    // document.getElementById('intro-media').style.setProperty('--bg','url(hero.jpg)');
+</script>
+
+<!-- Structured data for SEO -->
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "Verma & Associates",
+        "description": "Income Tax, GST, TDS compliance, insurance consulting, business setup & investigation services.",
+        "telephone": "+91-9415759262",
+        "email": "pkumar1302@gmail.com",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "9/31, Bahar A, Sahara States, Jankipuram",
+            "addressLocality": "Lucknow",
+            "postalCode": "226021",
+            "addressCountry": "IN"
+        },
+        "areaServed": "IN",
+        "sameAs": ["https://wa.me/919415759262"]
+    }
+</script>
+</body>
+</html>

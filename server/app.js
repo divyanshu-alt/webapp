@@ -72,7 +72,12 @@ app.get('/bollyvault', (req, res) => {
 });
 
 app.get('/vna', (req, res) => {
-  res.sendFile(path.join(PUBLIC, 'vna.html'));
+  const version = req.query.version;
+  let filename = 'vna.html';
+  if(version) {
+    filename = 'vna' + version + '.html';
+  }
+  res.sendFile(path.join(PUBLIC, filename));
 });
 
 app.get('/flashchat', (req, res) => {
