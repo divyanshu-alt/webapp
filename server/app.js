@@ -71,6 +71,10 @@ app.get('/bollyvault', (req, res) => {
   res.sendFile(path.join(PUBLIC, 'bollyvault.html'));
 });
 
+app.get('/vna', (req, res) => {
+  res.sendFile(path.join(PUBLIC, 'vna.html'));
+});
+
 app.get('/flashchat', (req, res) => {
   res.sendFile(path.join(PUBLIC, 'flashchat.html'));
 });
